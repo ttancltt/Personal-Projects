@@ -1,0 +1,323 @@
+Terminals unused in grammar
+
+    ERROR
+
+
+Grammar
+
+    0 $accept: commandLine $end
+
+    1 commandLine: expressionOrNothing '\n'
+    2            | expressionOrNothing error '\n'
+
+    3 expressionOrNothing: ε
+    4                    | expression
+
+    5 expression: command
+    6           | expression ';' expression
+    7           | expression AND expression
+    8           | expression OR expression
+    9           | expression '|' expression
+   10           | expression REDIR SINGLE_ARG
+   11           | expression '&'
+   12           | '(' expressionOrNothing ')'
+
+   13 command: SINGLE_ARG
+   14        | command SINGLE_ARG
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    '\n' (10) 1 2
+    '&' (38) 11
+    '(' (40) 12
+    ')' (41) 12
+    ';' (59) 6
+    '|' (124) 9
+    error (256) 2
+    AND (258) 7
+    OR (259) 8
+    REDIR <redirect> (260) 10
+    ERROR (261)
+    SINGLE_ARG <singleArg> (262) 10 13 14
+
+
+Nonterminals, with rules where they appear
+
+    $accept (14)
+        on left: 0
+    commandLine (15)
+        on left: 1 2
+        on right: 0
+    expressionOrNothing <expr> (16)
+        on left: 3 4
+        on right: 1 2 12
+    expression <expr> (17)
+        on left: 5 6 7 8 9 10 11 12
+        on right: 4 6 7 8 9 10 11
+    command <argsList> (18)
+        on left: 13 14
+        on right: 5 14
+
+
+State 0
+
+    0 $accept: • commandLine $end
+
+    SINGLE_ARG  shift, and go to state 1
+    '('         shift, and go to state 2
+
+    $default  reduce using rule 3 (expressionOrNothing)
+
+    commandLine          go to state 3
+    expressionOrNothing  go to state 4
+    expression           go to state 5
+    command              go to state 6
+
+
+State 1
+
+   13 command: SINGLE_ARG •
+
+    $default  reduce using rule 13 (command)
+
+
+State 2
+
+   12 expression: '(' • expressionOrNothing ')'
+
+    SINGLE_ARG  shift, and go to state 1
+    '('         shift, and go to state 2
+
+    $default  reduce using rule 3 (expressionOrNothing)
+
+    expressionOrNothing  go to state 7
+    expression           go to state 5
+    command              go to state 6
+
+
+State 3
+
+    0 $accept: commandLine • $end
+
+    $end  shift, and go to state 8
+
+
+State 4
+
+    1 commandLine: expressionOrNothing • '\n'
+    2            | expressionOrNothing • error '\n'
+
+    error  shift, and go to state 9
+    '\n'   shift, and go to state 10
+
+
+State 5
+
+    4 expressionOrNothing: expression •
+    6 expression: expression • ';' expression
+    7           | expression • AND expression
+    8           | expression • OR expression
+    9           | expression • '|' expression
+   10           | expression • REDIR SINGLE_ARG
+   11           | expression • '&'
+
+    ';'    shift, and go to state 11
+    '&'    shift, and go to state 12
+    AND    shift, and go to state 13
+    OR     shift, and go to state 14
+    '|'    shift, and go to state 15
+    REDIR  shift, and go to state 16
+
+    $default  reduce using rule 4 (expressionOrNothing)
+
+
+State 6
+
+    5 expression: command •
+   14 command: command • SINGLE_ARG
+
+    SINGLE_ARG  shift, and go to state 17
+
+    $default  reduce using rule 5 (expression)
+
+
+State 7
+
+   12 expression: '(' expressionOrNothing • ')'
+
+    ')'  shift, and go to state 18
+
+
+State 8
+
+    0 $accept: commandLine $end •
+
+    $default  accept
+
+
+State 9
+
+    2 commandLine: expressionOrNothing error • '\n'
+
+    '\n'  shift, and go to state 19
+
+
+State 10
+
+    1 commandLine: expressionOrNothing '\n' •
+
+    $default  reduce using rule 1 (commandLine)
+
+
+State 11
+
+    6 expression: expression ';' • expression
+
+    SINGLE_ARG  shift, and go to state 1
+    '('         shift, and go to state 2
+
+    expression  go to state 20
+    command     go to state 6
+
+
+State 12
+
+   11 expression: expression '&' •
+
+    $default  reduce using rule 11 (expression)
+
+
+State 13
+
+    7 expression: expression AND • expression
+
+    SINGLE_ARG  shift, and go to state 1
+    '('         shift, and go to state 2
+
+    expression  go to state 21
+    command     go to state 6
+
+
+State 14
+
+    8 expression: expression OR • expression
+
+    SINGLE_ARG  shift, and go to state 1
+    '('         shift, and go to state 2
+
+    expression  go to state 22
+    command     go to state 6
+
+
+State 15
+
+    9 expression: expression '|' • expression
+
+    SINGLE_ARG  shift, and go to state 1
+    '('         shift, and go to state 2
+
+    expression  go to state 23
+    command     go to state 6
+
+
+State 16
+
+   10 expression: expression REDIR • SINGLE_ARG
+
+    SINGLE_ARG  shift, and go to state 24
+
+
+State 17
+
+   14 command: command SINGLE_ARG •
+
+    $default  reduce using rule 14 (command)
+
+
+State 18
+
+   12 expression: '(' expressionOrNothing ')' •
+
+    $default  reduce using rule 12 (expression)
+
+
+State 19
+
+    2 commandLine: expressionOrNothing error '\n' •
+
+    $default  reduce using rule 2 (commandLine)
+
+
+State 20
+
+    6 expression: expression • ';' expression
+    6           | expression ';' expression •
+    7           | expression • AND expression
+    8           | expression • OR expression
+    9           | expression • '|' expression
+   10           | expression • REDIR SINGLE_ARG
+   11           | expression • '&'
+
+    '&'    shift, and go to state 12
+    AND    shift, and go to state 13
+    OR     shift, and go to state 14
+    '|'    shift, and go to state 15
+    REDIR  shift, and go to state 16
+
+    $default  reduce using rule 6 (expression)
+
+
+State 21
+
+    6 expression: expression • ';' expression
+    7           | expression • AND expression
+    7           | expression AND expression •
+    8           | expression • OR expression
+    9           | expression • '|' expression
+   10           | expression • REDIR SINGLE_ARG
+   11           | expression • '&'
+
+    '|'    shift, and go to state 15
+    REDIR  shift, and go to state 16
+
+    $default  reduce using rule 7 (expression)
+
+
+State 22
+
+    6 expression: expression • ';' expression
+    7           | expression • AND expression
+    8           | expression • OR expression
+    8           | expression OR expression •
+    9           | expression • '|' expression
+   10           | expression • REDIR SINGLE_ARG
+   11           | expression • '&'
+
+    '|'    shift, and go to state 15
+    REDIR  shift, and go to state 16
+
+    $default  reduce using rule 8 (expression)
+
+
+State 23
+
+    6 expression: expression • ';' expression
+    7           | expression • AND expression
+    8           | expression • OR expression
+    9           | expression • '|' expression
+    9           | expression '|' expression •
+   10           | expression • REDIR SINGLE_ARG
+   11           | expression • '&'
+
+    REDIR  shift, and go to state 16
+
+    $default  reduce using rule 9 (expression)
+
+
+State 24
+
+   10 expression: expression REDIR SINGLE_ARG •
+
+    $default  reduce using rule 10 (expression)

@@ -1,0 +1,43 @@
+Folders structure:
+
+/make-game-web 
+  ├── res/
+       ├── DARKSHAPE
+       ├── SHAPE
+       └──... (resources files)
+  ├──src/
+       ├── wrapper.c  
+       ├── game.c
+       ├── game.h
+       └── ...
+  ├── demo.js
+  ├── game.html
+  ├── Makefile
+  └── README
+
+
+These are some instructions to compile and run the game:
+    1. Open the folder make-game-web with integrated terminal 
+    2. "make all" to compile
+    3. "make serve" to be able to access the game at http://localhost:8001/game.html
+    After "make all" the folder structure should look like this
+
+/make-game-web 
+  ├── res/
+       ├── DARKSHAPE
+       ├── SHAPE
+       └──... (resources files)
+  ├──src/
+       ├── wrapper.c  
+       ├── game.c
+       ├── game.h
+       └── ...
+  ├── demo.js
+  ├── game.data
+  ├── game.html
+  ├── game.js
+  ├── game.wasm
+  ├── Makefile
+  └── README
+
+Enjoy !

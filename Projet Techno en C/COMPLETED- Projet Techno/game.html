@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+   
+    <title>My Game</title>
+    <style>
+        /* Reset body styles */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Game container styles */
+        #game-container {
+            display: inline-block;
+            max-width: 100%;
+            text-align: center;
+        }
+
+        /* Canvas styles */
+        #mycanvas {
+            display: block;
+            width: 800px; /* Default width */
+            height: 600px; /* Default height */
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer styles */
+        footer {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Modal styles */
+        #winModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #winModal div {
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+        }
+
+        #winModal button {
+            margin: 10px;
+            padding: 10px 20px;
+            background: #555;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #winModal button:hover {
+            background: #777;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Canvas for the game -->
+        <canvas id="mycanvas"></canvas>
+
+        <!-- Modal for game win -->
+        <div id="winModal">
+            <div>
+                <h2>🎉 Congrats! You won 🎉</h2>
+                <p>Choose your next move?</p>
+
+                <button id="playAgain">New default game</button>
+                <button id="closeModal">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Help Modal -->
+        <div id="helpModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); color: white; text-align: center; justify-content: center; align-items: center; z-index: 1000;">
+            <div style="background: #222; padding: 20px; border-radius: 10px; width: 300px;">
+            <h2>Help</h2>
+            <p>Here are the instructions for the game:</p>
+            <ul style="text-align: left;">
+                <li>Click on a cell to select it.</li>
+                <li>Press <strong>A</strong> or <strong>&larr;</strong> to rotate counterclockwise.</li>
+                <li>Press <strong>C</strong> or <strong>&rarr;</strong> to rotate clockwise.</li>
+                <li>Use the buttons below the grid to shuffle, solve, undo, or redo.</li>
+                <li>Click "Random Game" to create a new random game.</li>
+                <li>Press <strong>S</strong> to save the game.</li>
+                <li>Press <strong>L</strong> to load a saved game.</li>
+            </ul>
+            <button id="closeHelpModal" style="margin-top: 10px; padding: 10px 20px;">Close</button>
+            </div>
+        </div>
+        
+        <div id="randomGameModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); color: white; text-align: center; justify-content: center; align-items: center; z-index: 1000;">
+          <div style="background: #222; padding: 20px; border-radius: 10px; width: 300px;">
+            <h2>Create Random Game</h2>
+            <form id="randomGameForm">
+              <label for="nbRows">Rows:</label>
+              <input type="number" id="nbRows" name="nbRows" min="1" required><br><br>
+              <label for="nbCols">Columns:</label>
+              <input type="number" id="nbCols" name="nbCols" min="1" required><br><br>
+              <label for="wrapping">Wrapping:</label>
+              <select id="wrapping" name="wrapping">
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select><br><br>
+              <label for="nbEmpty">Empty Cells:</label>
+              <input type="number" id="nbEmpty" name="nbEmpty" min="0" required><br><br>
+              <label for="nbExtra">Extra Pieces:</label>
+              <input type="number" id="nbExtra" name="nbExtra" min="0" required><br><br>
+              <button type="submit">Create Game</button>
+              <button type="button" id="closeRandomGameModal">Cancel</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Footer for credits --> 
+        <footer>
+            <p><em>Vincent, Audran</em></p>
+            <p><em>Projet-techno 2025</em></p>
+        </footer>
+    </div>
+
+    <!-- Include game logic and WebAssembly -->
+    <script src="game.js"></script>
+    <script src="demo.js"></script>
+</body>
+</html>
