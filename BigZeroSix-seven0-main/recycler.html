@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Recycler</title>
+<link href="style_recycle.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+
+<style>
+    /* --- CSS CHO CÁC NÚT ĐIỀU HƯỚNG --- */
+    
+    .btn-nav {
+        position: absolute;
+        top: 20px;
+        text-decoration: none;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 50px; /* Bo tròn hoàn toàn (pill shape) hợp với Comfortaa */
+        font-family: 'Comfortaa', sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 1000;
+    }
+
+    .btn-nav:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+    }
+
+    /* Nút Quay lại (Góc Trái - Màu Xám Đậm) */
+    .btn-retour {
+        left: 20px;
+        background-color: #546e7a; 
+    }
+    .btn-retour:hover {
+        background-color: #455a64;
+    }
+
+    /* Nút Game (Góc Phải - Màu Xanh Tái Chế) */
+    .btn-game {
+        right: 20px;
+        background-color: #43a047; /* Màu xanh lá cây tươi */
+    }
+    .btn-game:hover {
+        background-color: #2e7d32;
+    }
+
+    /* Đẩy nội dung xuống để nút không che mất Header */
+    header {
+        position: relative; 
+        padding-top: 60px; 
+    }
+
+    /* Responsive cho điện thoại */
+    @media (max-width: 600px) {
+        .btn-nav {
+            padding: 8px 15px;
+            font-size: 12px;
+            top: 15px;
+        }
+        .btn-retour { left: 10px; }
+        .btn-game { right: 10px; }
+    }
+</style>
+
+</head>
+
+<body>
+
+<!-- 1. NÚT QUAY LẠI -->
+<a href="wordle.html" class="btn-nav btn-retour">
+    &#8592; Retour
+</a>
+
+<!-- 2. NÚT ĐẾN GAME RECYCLER -->
+<a href="game_recycler.html" class="btn-nav btn-game">
+    Jeu Recycler ♻️
+</a>
+
+<header>
+    <h1>Recycler</h1>
+    <p>Utiliser, réparer, réemployer, recycler : <b>chaque geste compte pour réduire l’impact du numérique</b></p>
+</header>
+
+<section>
+<div class="container">
+
+    <h2>Qu’est-ce que le recyclage numérique ?</h2>
+    <div class="definition">
+        Le recyclage consiste à <b>réduire les déchets, réutiliser les matériaux</b> et limiter l’impact environnemental.
+        Recycler, c’est donner une nouvelle vie aux objets, économiser de l’énergie et réduire l’extraction de matières premières.
+    </div>
+    <h1>Vrai ou Faux – Mieux recycler le numérique</h1>
+
+
+<p id="affirmation"></p>
+
+    <div class="buttons">
+        <button class="btn vrai" onclick="repondre(true)">VRAI</button>
+        <button class="btn faux" onclick="repondre(false)">FAUX</button>
+    </div>
+
+    <p id="correction"></p>
+
+</section>
+
+<div id = "button_idee">
+<button onclick="genererIdee()">Générer une idée pour mieux recycler</button>
+</div>
+    <h3 id="idee"></h3>
+
+
+
+<footer>
+© 2025 – Ressource NIRDLE – Réagissez pour l'avenir.
+</footer>
+
+<script>
+const affirmations = [
+    { texte: "Moins de 20 % des déchets électroniques mondiaux sont réellement recyclés.", reponse: true },
+    { texte: "Le plastique des ordinateurs n’est pas recyclable.", reponse: false },
+    { texte: "Recycler un smartphone permet de récupérer plus de 40 métaux différents.", reponse: true },
+    { texte: "Il vaut mieux jeter un ordinateur cassé plutôt que le réparer.", reponse: false },
+    { texte: "Les batteries d’ordinateurs et de smartphones ne peuvent pas être recyclées.", reponse: false },
+    { texte: "Le Wi-Fi consomme moins d’énergie que la 4G et la 5G.", reponse: true },
+    { texte: "Recycler un ordinateur portable peut réduire jusqu’à 80 % de son impact environnemental global.", reponse: true },
+    { texte: "Le réemploi informatique (donner, revendre, reconditionner) est plus écologique que le recyclage.", reponse: true }
+];
+
+let index = 0;
+
+function afficherAffirmation() {
+    document.getElementById("affirmation").textContent = affirmations[index].texte;
+    document.getElementById("correction").textContent = "";
+}
+
+function repondre(choix) {
+    const bonneReponse = affirmations[index].reponse;
+
+    if (choix === bonneReponse) {
+        document.getElementById("correction").textContent = "✔ Bonne réponse !";
+        document.getElementById("correction").style.color = "#3a8f55";
+    } else {
+        document.getElementById("correction").textContent = "✘ Mauvaise réponse...";
+        document.getElementById("correction").style.color = "#c0392b";
+    }
+
+    // Passe à la question suivante après 1,2 seconde
+    setTimeout(() => {
+        index++;
+        if (index < affirmations.length) {
+            afficherAffirmation();
+        } else {
+            document.getElementById("affirmation").textContent = "🎉 Fin du jeu !";
+            document.getElementById("correction").textContent = "";
+        }
+    }, 1200);
+}
+
+afficherAffirmation();
+</script>
+
+<script>
+const idees = [
+    "Installer des bacs de tri accessibles à tous.",
+    "Créer une zone de récupération pour le matériel non utilisé.",
+    "Favoriser l’achat de matériaux recyclés.",
+    "Réduire les emballages et encourager les alternatives durables.",
+    "Sensibiliser les élèves ou collègues aux bonnes pratiques de tri.",
+    "Mettre en place un atelier de réparation et de réemploi.",
+];
+
+function genererIdee() {
+    const random = Math.floor(Math.random() * idees.length);
+    document.getElementById("idee").textContent = idees[random];
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Protéger</title>
+<link href="style_protege.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Fjalla+One&display=swap" rel="stylesheet">
+
+<style>
+    /* --- CSS CHO CÁC NÚT ĐIỀU HƯỚNG --- */
+    
+    .btn-nav {
+        position: absolute;
+        top: 20px;
+        text-decoration: none;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 5px; /* Bo nhẹ tạo cảm giác cứng cáp, bảo mật */
+        font-family: 'Fjalla One', sans-serif; /* Font đậm, hẹp, hiện đại */
+        font-size: 16px; 
+        letter-spacing: 1px; /* Tăng khoảng cách chữ cho dễ đọc */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 1000;
+        text-transform: uppercase;
+    }
+
+    .btn-nav:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Nút Quay lại (Góc Trái - Màu Xám Đen) */
+    .btn-retour {
+        left: 20px;
+        background-color: #34495e; 
+        border-left: 5px solid #2c3e50; /* Điểm nhấn viền trái */
+    }
+    .btn-retour:hover {
+        background-color: #2c3e50;
+    }
+
+    /* Nút Game (Góc Phải - Màu Xanh Dương Bảo Mật) */
+    .btn-game {
+        right: 20px;
+        background-color: #2980b9; 
+        border-right: 5px solid #1abc9c; /* Điểm nhấn viền phải (màu xanh ngọc) */
+    }
+    .btn-game:hover {
+        background-color: #3498db;
+    }
+
+    /* Đẩy header xuống để không bị nút che mất */
+    header {
+        position: relative; 
+        padding-top: 70px; 
+    }
+
+    /* Responsive cho màn hình nhỏ */
+    @media (max-width: 600px) {
+        .btn-nav {
+            padding: 8px 15px;
+            font-size: 13px;
+            top: 15px;
+        }
+        .btn-retour { left: 10px; }
+        .btn-game { right: 10px; }
+    }
+</style>
+
+</head>
+
+<body>
+
+<!-- 1. NÚT QUAY LẠI -->
+<a href="wordle.html" class="btn-nav btn-retour">
+    &#8592; Retour
+</a>
+
+<!-- 2. NÚT VÀO GAME PROTÉGER -->
+<a href="game_proteger.html" class="btn-nav btn-game">
+    Jeu Protéger &#9654;
+</a>
+
+<header>
+    <h1>Protéger</h1>
+    <p>Protéger pour un numérique plus sûr</p>
+</header>
+
+<section>
+<div class="container">
+
+    <h2>Qu’est-ce que le recyclage numérique ?</h2>
+    <div class="definition">
+        Protéger le numérique consiste à <b>assurer la sécurité des données, la confidentialité et la durabilité des outils</b>.
+        Protéger, c’est éviter les pertes de données, sécuriser les appareils et adopter de bonnes pratiques pour un usage responsable.
+    </div>
+    <h1>Vrai ou Faux – Mieux protéger le numérique</h1>
+
+
+<p id="affirmation"></p>
+
+    <div class="buttons">
+        <button class="btn vrai" onclick="repondre(true)">VRAI</button>
+        <button class="btn faux" onclick="repondre(false)">FAUX</button>
+    </div>
+
+    <p id="correction"></p>
+
+</section>
+
+<div id = "button_idee">
+<button onclick="genererIdee()">Générer une idée pour mieux protéger</button>
+</div>
+    <h3 id="idee"></h3>
+
+
+
+<footer>
+© 2025 – Ressource NIRDLE – Réagissez pour l'avenir.
+</footer>
+
+<script>
+const affirmations = [
+    { texte: "Les mots de passe doivent être uniques et complexes pour chaque compte.", reponse: true },
+    { texte: "Il est sécuritaire de partager son mot de passe avec ses collègues.", reponse: false },
+    { texte: "Mettre à jour régulièrement son système d’exploitation aide à éviter les failles de sécurité.", reponse: true },
+    { texte: "Il est inutile d’installer un antivirus sur un ordinateur récent.", reponse: false },
+    { texte: "Les données stockées sur le cloud sont automatiquement protégées sans action de l’utilisateur.", reponse: false },
+    { texte: "Activer l’authentification à deux facteurs renforce la sécurité des comptes en ligne.", reponse: true },
+    { texte: "Les réseaux Wi-Fi publics sont toujours sûrs pour accéder à ses comptes personnels.", reponse: false },
+    { texte: "Sauvegarder régulièrement ses fichiers permet d’éviter la perte de données en cas de problème.", reponse: true }
+];
+
+let index = 0;
+
+function afficherAffirmation() {
+    document.getElementById("affirmation").textContent = affirmations[index].texte;
+    document.getElementById("correction").textContent = "";
+}
+
+function repondre(choix) {
+    const bonneReponse = affirmations[index].reponse;
+
+    if (choix === bonneReponse) {
+        document.getElementById("correction").textContent = "✔ Bonne réponse !";
+        document.getElementById("correction").style.color = "#3a8f55";
+    } else {
+        document.getElementById("correction").textContent = "✘ Mauvaise réponse...";
+        document.getElementById("correction").style.color = "#c0392b";
+    }
+
+    // Passe à la question suivante après 1,2 seconde
+    setTimeout(() => {
+        index++;
+        if (index < affirmations.length) {
+            afficherAffirmation();
+        } else {
+            document.getElementById("affirmation").textContent = "🎉 Fin du jeu !";
+            document.getElementById("correction").textContent = "";
+        }
+    }, 1200);
+}
+
+afficherAffirmation();
+</script>
+
+<script>
+const idees = [
+    "Utiliser des mots de passe complexes et un gestionnaire de mots de passe.",
+    "Activer l’authentification à deux facteurs sur tous ses comptes importants.",
+    "Sauvegarder régulièrement les données sur un disque externe ou dans le cloud sécurisé.",
+    "Installer les mises à jour de sécurité dès qu’elles sont disponibles.",
+    "Limiter le partage des informations personnelles en ligne.",
+    "Chiffrer les données sensibles pour qu’elles restent protégées.",
+];
+
+function genererIdee() {
+    const random = Math.floor(Math.random() * idees.length);
+    document.getElementById("idee").textContent = idees[random];
+}
+</script>
+
+</body>
+</html>

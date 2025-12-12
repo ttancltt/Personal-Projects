@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atelier IA - Reconnaissance d'Images</title>
+    
+    <!-- IMPORTANT : Utilisation de ml5 version 0.12.2 pour la compatibilité featureExtractor -->
+    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+    
+
+    <style>
+        body { 
+            background-repeat: no-repeat;
+            font-family: 'Segoe UI', sans-serif; 
+            text-align: center; 
+            background: #d8849e; 
+            color: #333; 
+            margin: 0; 
+            padding: 0; 
+            display: flex;
+            flex-direction: column;
+            
+        }
+        header {
+            background-color: #d8849e;
+            
+            justify-content: center;   /* centre horizontalement */
+            align-items: center;       /* centre verticalement */
+
+            display: flex;
+            /*justify-content: center;  centre le titre */
+            align-items: center;
+            padding: 0px;
+            border-bottom: #222 2px solid;
+            position: relative; /* permet de positionner le logo à gauche */
+        }
+.menu-icon {
+    position: absolute;
+  left: 20px;
+  cursor: pointer;
+}
+.menu-icon img {
+  width: 40px;
+  left: 20px;
+  cursor: pointer;
+}
+
+/* Menu mobile (caché au début) */
+.mobile-menu {
+  display: none;
+  position: absolute;
+  top: 90px;
+  left: 20px;
+  /*background: #b9315c;*/
+  background-color: white;
+  width: 200px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.mobile-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mobile-menu li {
+  margin-bottom: 15px;
+}
+
+.mobile-menu li a {
+  text-decoration: none;
+  color: #333;
+  font-size: 18px;
+}
+.logo-link {
+  position: static;  /* important : enlève le position: absolute */
+  left: 12px;
+  top: 50%;
+  transform: none;
+  display: inline-block;
+  
+}
+.left {
+  flex: 1;
+  padding: 10px 20px;
+  color: #222;
+}
+.copyright {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  padding: 40px;
+  align-items: stretch;
+  flex: 1;
+}
+
+  .logo {
+    width: 150px;
+    justify-content: center;
+    height: 80px;
+    display: flex;
+
+  }
+    .site-title {
+        margin: 0;
+  font-size: 1.25rem;
+  color: #222;
+  text-align: center;
+    }
+
+footer {
+    background-color: #333;
+    color: grey;
+    text-align: center;
+    padding: 10px;
+  }
+
+  
+nav {
+    width: auto;
+    background-color: #333;
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    margin: 0;
+  }
+        h1 { color: #2c3e50; margin-bottom: 10px; }
+
+        /* Style de la vidéo */
+        #video-container { 
+            margin: 20px auto; 
+            width: 320px; 
+            height: 240px; 
+            border: 5px solid #fff; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            border-radius: 12px; 
+            overflow: hidden; 
+            background: #000;
+        }
+        video { width: 320px; height: 240px; object-fit: cover; }
+
+        /* Boutons */
+        button { 
+            padding: 12px 24px; 
+            font-size: 16px; 
+            margin: 10px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 8px; 
+            transition: 0.1s; 
+            font-weight: bold; 
+            outline: none;
+        }
+        
+        .btn-active { transform: scale(0.95); box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .btn-data { background: #e0e0e0; color: #333; border-bottom: 4px solid #bbb; }
+        .btn-train { background: #27ae60; color: white; border-bottom: 4px solid #219150;}
+        .btn-train:hover { background: #2ecc71; }
+        .btn-train:disabled { background: #bdc3c7; border-bottom: none; cursor: not-allowed; }
+
+        /* Barre de progression */
+        #progress-container { width: 320px; background-color: #ddd; border-radius: 10px; margin: 20px auto; height: 25px; overflow: hidden; display: none; }
+        #progress-bar { width: 0%; height: 100%; background-color: #3498db; text-align: center; line-height: 25px; color: white; font-size: 14px; transition: width 0.1s;}
+        
+        /* Résultats */
+        #results { font-size: 22px; font-weight: bold; margin-top: 15px; min-height: 30px; color: #e74c3c;}
+        .ready-text { color: #27ae60 !important; }
+        
+        .key-hint { font-size: 13px; color: #7f8c8d; display: block; margin-top: 5px;}
+
+        /* Guide d'utilisation */
+        .instructions {
+            max-width: 600px;
+            margin: 40px auto 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: left;
+        }
+        .instructions h2 { font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0;}
+        .instructions ol { padding-left: 20px; }
+        .instructions li { margin-bottom: 10px; line-height: 1.5; }
+        
+
+
+    </style>
+</head>
+
+<script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const menuIcon = document.querySelector('.menu-icon');
+        const menu = document.querySelector('.mobile-menu');
+        if (!menuIcon || !menu) return;
+        menuIcon.addEventListener('click', () => {
+          menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        });
+      });
+    </script>
+
+<body>
+
+    <header>
+  <div class="menu-icon">
+    <img src="menu.png" alt="Menu" />
+  </div>
+  <a class="logo-link" href="home.html">
+    <img class="logo" src="logopure-removebg-preview.png" alt="Logo" />
+  </a>
+  
+
+  <nav class="mobile-menu">
+    <ul>
+      <li><a href="home.html">Home</a></li>
+      <li><a href="ia.html">Expérience IA</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+<div style="background: linear-gradient(to top, #d8849e, #333);">
+      <br>
+    </div>
+
+    <h1>Laboratoire d'IA : Apprentissage Machine</h1>
+    <p style="color: #666;">Apprenez à l'ordinateur à distinguer deux objets !</p>
+    
+    <div id="video-container"></div>
+    
+    <div id="results">⏳ Chargement du modèle... (Veuillez patienter)</div>
+
+    <div id="progress-container">
+        <div id="progress-bar">0%</div>
+    </div>
+
+    <div class="controls">
+        <div style="display:inline-block">
+            <!-- IMPORTANT : Les noms correspondent aux étiquettes (labels) -->
+            <button class="btn-data" id="btnA" onclick="addExample('Objet A')">📸 Objet A (0)</button>
+            <span class="key-hint">(Touche <b>A</b>)</span>
+        </div>
+
+        <div style="display:inline-block">
+            <button class="btn-data" id="btnB" onclick="addExample('Objet B')">📸 Objet B (0)</button>
+            <span class="key-hint">(Touche <b>B</b>)</span>
+        </div>
+        
+        <br><br>
+        
+        <div style="display:inline-block">
+            <button class="btn-train" id="trainBtn" onclick="trainModel()">🚀 Entraîner l'IA</button>
+            <span class="key-hint">(Touche <b>Entrée</b>)</span>
+        </div>
+    </div>
+
+    <!-- GUIDE D'UTILISATION EN FRANÇAIS -->
+    <div class="instructions">
+        <h2>📚 Guide d'utilisation</h2>
+        <ol>
+            <li>
+                <strong>Étape 1 : La Collecte (Données)</strong><br>
+                Montrez un premier objet (ex: un stylo) devant la caméra et appuyez plusieurs fois sur <b>A</b> (environ 15-20 images).<br>
+                Faites pareil avec un deuxième objet (ex: votre main) en appuyant sur <b>B</b>.
+            </li>
+            <li>
+                <strong>Étape 2 : L'Entraînement (Training)</strong><br>
+                Une fois que vous avez assez d'images, cliquez sur <b>"Entraîner l'IA"</b> (ou touche Entrée). Observez la barre de progression. L'ordinateur cherche les différences entre A et B.
+            </li>
+            <li>
+                <strong>Étape 3 : Le Test (Inférence)</strong><br>
+                Quand c'est fini, montrez les objets à nouveau. L'IA affichera ce qu'elle voit avec un <b>pourcentage de confiance</b>.
+            </li>
+        </ol>
+    </div>
+
+          <div style="background: linear-gradient(to bottom, #d8849e, #333);"><br></div>
+
+
+    <footer>
+
+
+      <div class="content">
+      <aside class="left">
+        <h3 style="color: grey; text-decoration: none;">
+          Mentions légales
+        </h3>
+      </aside>
+      
+      <section class="copyright">
+        <div class="text">
+          <h3 style="color: grey; text-decoration: none;">
+            FIND ME SOME COPYRIGHT TEXT TO PUT HERE !
+          </h3>
+        </div>
+      </section>
+      </div>
+
+      <center  style="display: flex;flex-direction: column;">
+          <div class="copyright">
+            © 2025 NIRDLE X NDI by BigZeroSix-seven
+
+          </div>
+      </center>
+      
+    </footer>
+
+    <script>
+        let classifier;
+        let video;
+        let featureExtractor;
+        const totalEpochs = 50; // Nombre de tours d'entraînement
+        let currentEpoch = 0;
+        let countA = 0;
+        let countB = 0;
+        let isTraining = false;
+        let isModelReady = false; 
+
+        function setup() {
+            // Création de la vidéo
+            video = document.createElement('video');
+            video.setAttribute('playsinline', '');
+            video.setAttribute('autoplay', '');
+            video.width = 320; 
+            video.height = 240;
+            document.getElementById('video-container').appendChild(video);
+
+            navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                video.srcObject = stream;
+                video.play();
+                
+                // Chargement du modèle MobileNet
+                featureExtractor = ml5.featureExtractor('MobileNet', { numEpochs: totalEpochs, topk: 3 }, modelLoaded);
+                classifier = featureExtractor.classification(video, videoReady);
+            });
+        }
+
+        function modelLoaded() {
+            isModelReady = true;
+            const res = document.getElementById('results');
+            res.innerText = "✅ Prêt ! Ajoutez des exemples avec A et B.";
+            res.classList.add('ready-text');
+            console.log("Modèle chargé !");
+        }
+
+        function videoReady() { console.log("Vidéo prête"); }
+
+        // --- GESTION DU CLAVIER ---
+        document.addEventListener('keydown', function(event) {
+            if (isTraining) return;
+
+            const key = event.key.toLowerCase(); 
+
+            if (key === 'a') {
+                triggerButtonEffect('btnA');
+                addExample('Objet A');
+            } else if (key === 'b') {
+                triggerButtonEffect('btnB');
+                addExample('Objet B');
+            } else if (event.key === 'Enter') {
+                triggerButtonEffect('trainBtn');
+                trainModel();
+            }
+        });
+
+        function triggerButtonEffect(btnId) {
+            const btn = document.getElementById(btnId);
+            if(!btn.disabled) {
+                btn.classList.add('btn-active');
+                setTimeout(() => btn.classList.remove('btn-active'), 100);
+            }
+        }
+
+        function addExample(label) {
+            if (!isModelReady || !classifier) {
+                console.log("Le modèle n'est pas encore prêt !");
+                return; 
+            }
+            classifier.addImage(label);
+            
+            // Mise à jour des compteurs (Texte en Français)
+            if(label === 'Objet A') {
+                countA++;
+                document.getElementById('btnA').innerText = `📸 Objet A (${countA})`;
+            } else {
+                countB++;
+                document.getElementById('btnB').innerText = `📸 Objet B (${countB})`;
+            }
+        }
+
+        function trainModel() {
+            if (!isModelReady) return;
+            
+            if(countA < 3 || countB < 3) {
+                alert("Il faut au moins 3 images par objet pour commencer l'entraînement !");
+                return;
+            }
+            isTraining = true;
+            document.getElementById('results').innerText = "💪 Entraînement en cours...";
+            document.getElementById('results').classList.remove('ready-text');
+            document.getElementById('progress-container').style.display = "block";
+            document.getElementById('trainBtn').disabled = true;
+            
+            currentEpoch = 0;
+
+            // Fonction callback appelée pendant l'entraînement
+            classifier.train((loss) => {
+                if (loss === null) {
+                    // FIN
+                    updateProgressBar(100);
+                    document.getElementById('results').innerText = "🎉 Terminé ! Testez maintenant.";
+                    document.getElementById('results').classList.add('ready-text');
+                    document.getElementById('trainBtn').innerText = "Entraînement Fini";
+                    classify(); 
+                } else {
+                    // EN COURS
+                    currentEpoch++;
+                    let percentage = Math.floor((currentEpoch / totalEpochs) * 100);
+                    if (percentage > 99) percentage = 99;
+                    updateProgressBar(percentage);
+                }
+            });
+        }
+
+        function updateProgressBar(percent) {
+            const bar = document.getElementById('progress-bar');
+            bar.style.width = percent + '%';
+            bar.innerText = percent + '%';
+        }
+
+        function classify() {
+            classifier.classify((err, results) => {
+                if (err) {
+                    console.error(err);
+                } else {
+                    const label = results[0].label;
+                    const confidence = (results[0].confidence * 100).toFixed(1);
+                    // Affichage du résultat en Français
+                    document.getElementById('results').innerText = `Je vois : ${label} (${confidence}%)`;
+                    classify(); // Boucle continue
+                }
+            });
+        }
+
+        setup();
+    </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Atelier NIRD - Jeu Éco-Responsable</title>
+    <style>
+        /* GREEN IT : Dark Mode tiết kiệm năng lượng, CSS tối giản */
+        :root {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --card: #1e1e1e;
+            --accent: #66bb6a; /* Xanh lá NIRD */
+            --danger: #ef5350;
+            --tech: #42a5f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 { color: var(--accent); margin-bottom: 5px; text-align: center; }
+        .subtitle { color: #888; font-style: italic; margin-bottom: 20px; font-size: 0.9em; }
+
+        /* HUD - Thanh trạng thái */
+        .hud {
+            display: flex;
+            gap: 20px;
+            background: #2c2c2c;
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            border: 1px solid #444;
+        }
+        .stat { font-weight: bold; font-size: 1.1em; }
+        .score-co2 { color: var(--accent); }
+        .score-trash { color: var(--danger); }
+
+        /* Khu vực chơi game */
+        #game-area {
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        /* Thẻ Tình huống (Scenario Card) */
+        .scenario-card {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .device-icon { font-size: 3em; margin-bottom: 10px; display: block; }
+        .problem-title { font-size: 1.4em; font-weight: bold; margin-bottom: 10px; color: white; }
+        .problem-desc { color: #bbb; margin-bottom: 30px; line-height: 1.5; }
+
+        /* Các nút lựa chọn */
+        .choices { display: flex; flex-direction: column; gap: 10px; }
+        
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            font-weight: 600;
+            text-align: left;
+            position: relative;
+        }
+        button:hover { transform: translateX(5px); opacity: 0.9; }
+        button:active { transform: scale(0.98); }
+
+        .btn-goliath { background: #d32f2f; color: white; } /* Big Tech */
+        .btn-nird { background: #388e3c; color: white; } /* NIRD */
+        .btn-neutral { background: #1976d2; color: white; } /* Giải pháp tạm */
+
+        /* Thông báo kết quả từng lượt */
+        #feedback-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .feedback-title { font-size: 2em; margin-bottom: 10px; }
+        .feedback-msg { margin-bottom: 20px; color: #ddd; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Màn hình kết thúc */
+        #end-screen { display: none; text-align: center; max-width: 600px; }
+        .rank { font-size: 3em; font-weight: bold; color: var(--accent); display: block; margin: 20px 0; }
+
+    </style>
+</head>
+<body>
+
+    <h1>🛠️ L'Atelier NIRD</h1>
+    <p class="subtitle">Résistez à l'obsolescence programmée !</p>
+
+    <!-- Thanh chỉ số -->
+    <div class="hud" id="hud">
+        <div class="stat score-co2">🌍 CO2 Épargné: <span id="score">0</span> kg</div>
+        <div class="stat score-trash">🗑️ Déchets: <span id="waste">0</span> kg</div>
+    </div>
+
+    <!-- Khu vực chơi -->
+    <div id="game-area">
+        <!-- Nội dung sẽ được JS nạp vào đây -->
+    </div>
+
+    <!-- Màn hình kết thúc -->
+    <div id="end-screen">
+        <h2>Bilan de la Résistance</h2>
+        <p>Vous avez terminé votre service à l'atelier.</p>
+        <span class="rank" id="final-rank">SAGE</span>
+        <p id="final-msg"></p>
+        <button onclick="location.reload()" style="background: var(--text); color: black; text-align: center;">Rejouer</button>
+    </div>
+
+    <script>
+        // Cấu trúc dữ liệu kịch bản (Scenario)
+        const scenarios = [
+            {
+                id: 1,
+                icon: "💻",
+                title: "Windows 10 en fin de vie",
+                desc: "Un lycée possède 50 PC qui fonctionnent bien matériellement, mais Windows 10 ne sera plus supporté. Windows 11 refuse de s'installer.",
+                choices: [
+                    { text: "Acheter 50 nouveaux PC", type: "goliath", co2: 0, waste: 150, msg: "❌ Désastreux ! 150kg de déchets électroniques générés inutilement." },
+                    { text: "Installer Linux (Mint/Ubuntu)", type: "nird", co2: 15000, waste: 0, msg: "✅ Excellent ! Les PC sont sauvés, rapides et sécurisés." },
+                    { text: "Forcer l'installation de Win11", type: "neutral", co2: 0, waste: 0, msg: "⚠️ Risqué. Le système sera instable et lent sans support officiel." }
+                ]
+            },
+            {
+                id: 2,
+                icon: "📱",
+                title: "Smartphone avec écran cassé",
+                desc: "Un élève vient avec son téléphone dont l'écran est fissuré. Le tactile fonctionne encore un peu.",
+                choices: [
+                    { text: "Réparer l'écran soi-même (iFixit)", type: "nird", co2: 50, waste: 0.1, msg: "✅ Bravo ! Réparer prolonge la durée de vie de 2 ans." },
+                    { text: "Acheter le dernier modèle neuf", type: "goliath", co2: -80, waste: 0.2, msg: "❌ Mauvais réflexe. 80% de l'empreinte carbone vient de la fabrication." },
+                    { text: "Acheter un reconditionné", type: "neutral", co2: 20, waste: 0.2, msg: "🆗 Pas mal. C'est mieux que du neuf, mais réparer le vôtre était l'idéal." }
+                ]
+            },
+            {
+                id: 3,
+                icon: "📧",
+                title: "Envoi de devoirs (20 Mo)",
+                desc: "Un professeur veut envoyer un gros PDF de cours à ses 30 élèves.",
+                choices: [
+                    { text: "Mettre en pièce jointe par mail", type: "goliath", co2: -10, waste: 0, msg: "❌ Lourd ! Le fichier est dupliqué 30 fois sur les serveurs." },
+                    { text: "Utiliser un lien de dépôt (FileVert)", type: "nird", co2: 5, waste: 0, msg: "✅ Super ! Le fichier n'est stocké qu'une fois et expire automatiquement." },
+                    { text: "Imprimer pour tout le monde", type: "neutral", co2: -5, waste: 1, msg: "⚠️ Le papier a aussi un impact écologique important." }
+                ]
+            },
+            {
+                id: 4,
+                icon: "💾",
+                title: "PC de la salle des profs lent",
+                desc: "L'ordinateur met 10 minutes à démarrer. Les profs s'énervent.",
+                choices: [
+                    { text: "Remplacer le disque dur par un SSD", type: "nird", co2: 200, waste: 0.2, msg: "✅ Magique ! Le PC est 10x plus rapide pour un petit investissement." },
+                    { text: "Jeter le PC et en demander un autre", type: "goliath", co2: -300, waste: 5, msg: "❌ Quel gâchis ! C'était juste un problème de disque dur." },
+                    { text: "Ne rien faire (Souffrir)", type: "neutral", co2: 0, waste: 0, msg: "😐 La frustration des profs augmente, mais pas le CO2..." }
+                ]
+            }
+        ];
+
+        let currentLevel = 0;
+        let scoreCO2 = 0;
+        let scoreWaste = 0;
+
+        const gameArea = document.getElementById('game-area');
+        const scoreEl = document.getElementById('score');
+        const wasteEl = document.getElementById('waste');
+
+        function loadScenario() {
+            if (currentLevel >= scenarios.length) {
+                endGame();
+                return;
+            }
+
+            const data = scenarios[currentLevel];
+            
+            let html = `
+                <div class="scenario-card">
+                    <span class="device-icon">${data.icon}</span>
+                    <div class="problem-title">${data.title}</div>
+                    <div class="problem-desc">${data.desc}</div>
+                    <div class="choices">
+            `;
+
+            // Trộn thứ tự nút để người chơi không đoán mò
+            const shuffledChoices = data.choices.sort(() => Math.random() - 0.5);
+
+            shuffledChoices.forEach(choice => {
+                let btnClass = "";
+                // Trong thực tế, có thể ẩn class để user không soi code, 
+                // nhưng đây là game giáo dục nên ta để logic xử lý trong JS
+                html += `<button onclick="handleChoice('${choice.type}', ${choice.co2}, ${choice.waste}, '${choice.msg.replace(/'/g, "\\'")}')" style="background:#333; color:white;">${choice.text}</button>`; 
+            });
+
+            html += `
+                    </div>
+                </div>
+                <div id="feedback-overlay">
+                    <div class="feedback-title" id="fb-icon"></div>
+                    <div class="feedback-msg" id="fb-msg"></div>
+                    <button onclick="nextLevel()" style="background:var(--accent); color:black; width:auto; display:inline-block;">Continuer</button>
+                </div>
+            `;
+
+            gameArea.innerHTML = html;
+        }
+
+        function handleChoice(type, co2, waste, msg) {
+            scoreCO2 += co2;
+            scoreWaste += waste;
+
+            // Cập nhật UI
+            scoreEl.innerText = scoreCO2;
+            wasteEl.innerText = scoreWaste;
+
+            // Hiển thị Feedback
+            const overlay = document.getElementById('feedback-overlay');
+            const fbIcon = document.getElementById('fb-icon');
+            const fbMsg = document.getElementById('fb-msg');
+
+            overlay.style.display = 'flex';
+            fbMsg.innerText = msg;
+
+            if (type === 'nird') {
+                fbIcon.innerText = "🌟 NIRD APPROUVÉ";
+                fbIcon.style.color = "var(--accent)";
+            } else if (type === 'goliath') {
+                fbIcon.innerText = "💀 GOLIATH GAGNE";
+                fbIcon.style.color = "var(--danger)";
+            } else {
+                fbIcon.innerText = "😐 BOF...";
+                fbIcon.style.color = "#aaa";
+            }
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            loadScenario();
+        }
+
+        function endGame() {
+            document.getElementById('hud').style.display = 'none';
+            gameArea.style.display = 'none';
+            const endScreen = document.getElementById('end-screen');
+            const rankEl = document.getElementById('final-rank');
+            const finalMsg = document.getElementById('final-msg');
+
+            endScreen.style.display = 'block';
+
+            let rank = "";
+            let message = "";
+
+            if (scoreCO2 > 10000 && scoreWaste < 2) {
+                rank = "RÉSISTANT LÉGENDAIRE 🛡️";
+                message = "Vous avez parfaitement compris l'esprit NIRD. Grâce à Linux et au réemploi, vous avez sauvé la planète numérique !";
+                rankEl.style.color = "#4caf50";
+            } else if (scoreCO2 > 0) {
+                rank = "APPRENTI ÉCOLO 🌱";
+                message = "Vous faites des efforts, mais attention aux pièges de la consommation facile.";
+                rankEl.style.color = "#ffeb3b";
+            } else {
+                rank = "AGENT DU GOLIATH 🏭";
+                message = "Vous avez généré trop de déchets. L'école a fait faillite et la planète souffre. Réessayez !";
+                rankEl.style.color = "#f44336";
+            }
+
+            rankEl.innerText = rank;
+            finalMsg.innerText = message;
+        }
+
+        // Bắt đầu game
+        loadScenario();
+
+    </script>
+</body>
+</html>

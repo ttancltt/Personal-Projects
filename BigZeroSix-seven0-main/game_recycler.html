@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Tri Sélectif - Nuit de l'Info</title>
+    <style>
+        /* CSS tối giản, chế độ Dark Mode tiết kiệm năng lượng */
+        :root {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --item-bg: #2d2d2d;
+            --bin-menager: #5d4037; /* Nâu/Xám */
+            --bin-emballage: #fbc02d; /* Vàng */
+            --bin-electro: #d32f2f; /* Đỏ */
+            --success: #4caf50;
+            --error: #f44336;
+        }
+
+        body {
+            font-family: system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { margin-bottom: 10px; color: #64b5f6; }
+        p { margin-bottom: 20px; text-align: center; max-width: 600px; }
+
+        /* Khu vực chứa đồ vật chưa phân loại */
+        #source-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            border: 2px dashed #555;
+            border-radius: 8px;
+            min-height: 60px;
+            width: 90%;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: #1e1e1e;
+        }
+
+        /* Đồ vật (Items) - Không dùng ảnh */
+        .item {
+            background-color: var(--item-bg);
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: grab;
+            border: 1px solid #444;
+            user-select: none;
+            transition: transform 0.2s;
+        }
+        .item:active { cursor: grabbing; transform: scale(1.05); }
+
+        /* Khu vực thùng rác */
+        .bins-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .bin {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+            min-height: 250px;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid transparent;
+            transition: background 0.3s;
+        }
+
+        .bin h3 { margin-top: 0; text-align: center; pointer-events: none; }
+        .bin-content {
+            flex: 1;
+            width: 100%;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 5px;
+        }
+
+        /* Màu sắc các thùng */
+        #bin-menager { border-color: var(--bin-menager); background: rgba(93, 64, 55, 0.1); }
+        #bin-emballage { border-color: var(--bin-emballage); background: rgba(251, 192, 45, 0.1); }
+        #bin-electro { border-color: var(--bin-electro); background: rgba(211, 47, 47, 0.1); }
+
+        /* Hiệu ứng khi kéo đồ vào thùng */
+        .bin.drag-over { background: rgba(255,255,255,0.1); transform: scale(1.02); }
+
+        /* Nút bấm */
+        button {
+            margin-top: 30px;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover { background: #1565c0; }
+
+        /* Bảng kết quả */
+        #result-area {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 800px;
+            display: none; /* Ẩn mặc định */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: #1e1e1e;
+        }
+        th, td { padding: 12px; border: 1px solid #333; text-align: left; }
+        th { background: #333; }
+        .status-correct { color: var(--success); font-weight: bold; }
+        .status-wrong { color: var(--error); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>♻️ Défi du Tri Sélectif</h1>
+    <p>Glissez les déchets dans la bonne poubelle. Attention aux déchets électroniques (NIRD) !</p>
+
+    <!-- Khu vực chứa items -->
+    <div id="source-container" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <!-- Items sẽ được sinh ra bằng JS -->
+    </div>
+
+    <!-- Khu vực thùng rác -->
+    <div class="bins-container">
+        <!-- Thùng 1: Rác sinh hoạt -->
+        <div class="bin" id="bin-menager" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
+            <h3 style="color: #a1887f;">Déchets Ménagers<br>(Ordure résiduelle)</h3>
+            <div class="bin-content"></div>
+        </div>
+
+        <!-- Thùng 2: Tái chế/Emballage -->
+        <div class="bin" id="bin-emballage" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
+            <h3 style="color: #fbc02d;">Emballages & Papiers<br>(Recyclable)</h3>
+            <div class="bin-content"></div>
+        </div>
+
+        <!-- Thùng 3: Điện tử (Quan trọng cho chủ đề NIRD) -->
+        <div class="bin" id="bin-electro" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
+            <h3 style="color: #ef5350;">Déchets Électroniques<br>(DEEE / NIRD)</h3>
+            <div class="bin-content"></div>
+        </div>
+    </div>
+
+    <button onclick="checkResult()">✅ Valider le Tri</button>
+
+    <!-- Bảng kết quả -->
+    <div id="result-area">
+        <h2 id="score-text"></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Objet</th>
+                    <th>Votre Choix</th>
+                    <th>Correction</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody id="result-table-body"></tbody>
+        </table>
+        <button onclick="location.reload()" style="background:#555; margin-top:20px;">Rejouer</button>
+    </div>
+
+<script>
+    // Dữ liệu trò chơi (Bạn có thể thêm bớt tùy ý)
+    const itemsData = [
+        { id: 1, name: "Bouteille en plastique", type: "bin-emballage", typeName: "Emballages" },
+        { id: 2, name: "Restes de repas", type: "bin-menager", typeName: "Déchets Ménagers" },
+        { id: 3, name: "Vieux Smartphone", type: "bin-electro", typeName: "Électronique" },
+        { id: 4, name: "Carton de pizza (propre)", type: "bin-emballage", typeName: "Emballages" },
+        { id: 5, name: "Mouchoir sale", type: "bin-menager", typeName: "Déchets Ménagers" },
+        { id: 6, name: "Câble USB cassé", type: "bin-electro", typeName: "Électronique" },
+        { id: 7, name: "Canette de soda", type: "bin-emballage", typeName: "Emballages" },
+        { id: 8, name: "Ordinateur portable HS", type: "bin-electro", typeName: "Électronique" }
+    ];
+
+    // Khởi tạo items ngẫu nhiên
+    const sourceContainer = document.getElementById('source-container');
+    
+    // Trộn ngẫu nhiên mảng
+    itemsData.sort(() => Math.random() - 0.5);
+
+    itemsData.forEach(item => {
+        const el = document.createElement('div');
+        el.classList.add('item');
+        el.innerText = item.name;
+        el.draggable = true;
+        el.id = "item-" + item.id;
+        el.dataset.correctBin = item.type; // Lưu đáp án đúng vào dataset
+        el.dataset.name = item.name;
+        el.dataset.typeName = item.typeName;
+        
+        // Gán sự kiện drag
+        el.addEventListener('dragstart', drag);
+        sourceContainer.appendChild(el);
+    });
+
+    // --- Các hàm xử lý Drag & Drop ---
+
+    function allowDrop(ev) {
+        ev.preventDefault(); // Mặc định trình duyệt không cho drop, phải preventDefault
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function drop(ev) {
+        ev.preventDefault();
+        const data = ev.dataTransfer.getData("text");
+        const draggedElement = document.getElementById(data);
+        
+        // Tìm target là thùng rác hoặc container gốc
+        let target = ev.target;
+        
+        // Nếu thả vào thẻ h3 hoặc div con, tìm cha là .bin hoặc #source-container
+        while (!target.classList.contains('bin') && target.id !== 'source-container') {
+            target = target.parentElement;
+            if(!target) return; // Nếu kéo ra ngoài
+        }
+
+        // Xóa hiệu ứng highlight
+        target.classList.remove('drag-over');
+
+        // Nếu là thùng rác, append vào div con .bin-content để đẹp hơn
+        if (target.classList.contains('bin')) {
+            target.querySelector('.bin-content').appendChild(draggedElement);
+        } else {
+            // Nếu trả về source container
+            target.appendChild(draggedElement);
+        }
+    }
+
+    // Hiệu ứng thị giác khi kéo vào vùng thả
+    function dragEnter(ev) {
+        let target = ev.target;
+        while (!target.classList.contains('bin')) {
+            target = target.parentElement;
+            if(!target) return;
+        }
+        target.classList.add('drag-over');
+    }
+
+    function dragLeave(ev) {
+        let target = ev.target;
+        while (!target.classList.contains('bin')) {
+            target = target.parentElement;
+            if(!target) return;
+        }
+        target.classList.remove('drag-over');
+    }
+
+    // --- Hàm xử lý kết quả ---
+
+    function checkResult() {
+        const resultArea = document.getElementById('result-area');
+        const tbody = document.getElementById('result-table-body');
+        tbody.innerHTML = ""; // Xóa kết quả cũ
+        
+        let correctCount = 0;
+        let totalItems = itemsData.length;
+        let allSorted = true;
+
+        // Lấy tất cả các item
+        const allItems = document.querySelectorAll('.item');
+
+        allItems.forEach(el => {
+            const parent = el.parentElement.parentElement; // .bin-content -> .bin
+            const userBinId = parent.id;
+            const correctBinId = el.dataset.correctBin;
+            const itemName = el.dataset.name;
+            const correctTypeName = el.dataset.typeName;
+
+            let statusText = "";
+            let statusClass = "";
+            let userChoiceText = "";
+
+            // Kiểm tra xem user có phân loại chưa (hay vẫn để ở source)
+            if (parent.id === "source-container" || !parent.classList.contains('bin')) {
+                userChoiceText = "Non trié";
+                statusText = "⚠️ Manquant";
+                statusClass = "status-wrong";
+                allSorted = false;
+            } else {
+                // Lấy tên thùng rác user chọn
+                userChoiceText = parent.querySelector('h3').innerText.split('\n')[0];
+
+                if (userBinId === correctBinId) {
+                    correctCount++;
+                    statusText = "Correct ✅";
+                    statusClass = "status-correct";
+                } else {
+                    statusText = "Incorrect ❌";
+                    statusClass = "status-wrong";
+                }
+            }
+
+            // Tạo hàng trong bảng
+            const row = `
+                <tr>
+                    <td>${itemName}</td>
+                    <td>${userChoiceText}</td>
+                    <td>${correctTypeName}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+
+        // Hiển thị điểm số
+        const scoreEl = document.getElementById('score-text');
+        if (!allSorted) {
+            scoreEl.innerText = `Vous n'avez pas tout trié ! Score : ${correctCount} / ${totalItems}`;
+            scoreEl.style.color = "#ff9800";
+        } else if (correctCount === totalItems) {
+            scoreEl.innerText = `Parfait ! Score : ${correctCount} / ${totalItems} 🏆`;
+            scoreEl.style.color = "#4caf50";
+        } else {
+            scoreEl.innerText = `Bien essayé ! Score : ${correctCount} / ${totalItems}`;
+            scoreEl.style.color = "#e0e0e0";
+        }
+
+        resultArea.style.display = "block";
+        
+        // Scroll xuống bảng kết quả
+        resultArea.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

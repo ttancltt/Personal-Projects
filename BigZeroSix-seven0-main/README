@@ -1,0 +1,77 @@
+Nirdle by Big Zero 6 – Dans le cadre de la Nuit de l’Info édition 2025
+
+Ce projet a été réalisé pour répondre au sujet national de façon ludique et interactive,
+à travers des mini-jeux éducatifs et du contenu pédagogique sur différents thèmes intimements liés à la démarche NIRD :
+Apprendre, Protéger, Recycler, Innover, Durable, Éthique.
+
+L’objectif est de sensibiliser, divertir et permettre aux utilisateurs de tout âge de découvrir des notions importantes tout en s’amusant.
+
+Réalisé par :
+Alexis Collignon, Arthur Chene, Kada Tires, Luce Rosnet–Amiel, Nabil Benhayoun, Romain Cachou, Thien An Truong.
+
+Structure du projet :
+
+├── Images
+│   └── Letters
+│       ├── A1.png
+│       ├── B1.png
+│       ├── C1.png
+│       ├── D1.png
+│       ├── E1.png
+│       ├── F1.png
+│       ├── G1.png
+│       ├── H1.png
+│       ├── I1.png
+│       ├── J1.png
+│       ├── K1.png
+│       ├── L1.png
+│       ├── M1.png
+│       ├── N1.png
+│       ├── O1.png
+│       ├── P1.png
+│       ├── Q1.png
+│       ├── R1.png
+│       ├── S1.png
+│       ├── T1.png
+│       ├── U1.png
+│       ├── V1.png
+│       ├── W1.png
+│       ├── X1.png
+│       ├── Y1.png
+│       └── Z1.png
+├── README
+└── Sources
+    ├── apprendre.html
+    ├── contact.css
+    ├── contact.html
+    ├── contenu.css
+    ├── contenu.html
+    ├── durable.html
+    ├── ethique.html
+    ├── game_apprendre.html
+    ├── game_durable.html
+    ├── game_ethique.html
+    ├── game_innover.html
+    ├── game_proteger.html
+    ├── game_recycler.html
+    ├── grill.css
+    ├── grill.html
+    ├── home.css
+    ├── home.html
+    ├── home.js
+    ├── index.html
+    ├── innover.html
+    ├── logopure-removebg-preview.png
+    ├── logo-removebg-preview.png
+    ├── menu.png
+    ├── modes-removebg-preview.png
+    ├── Mots.txt
+    ├── proteger.html
+    ├── recycler.html
+    ├── style_apprend.css
+    ├── style_durable.css
+    ├── style_ethique.css
+    ├── style_innover.css
+    ├── style_protege.css
+    ├── style_recycle.css
+    └── wordle.html

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Innover</title>
+<link href="style_innover.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Workbench&display=swap" rel="stylesheet">
+
+<style>
+    /* --- CSS CHO CÁC NÚT ĐIỀU HƯỚNG --- */
+
+    .btn-nav {
+        position: absolute;
+        top: 20px;
+        text-decoration: none;
+        color: white; /* Màu chữ */
+        padding: 10px 20px;
+        border-radius: 8px; /* Bo góc nhẹ, hợp với font Workbench */
+        font-family: 'Workbench', sans-serif; /* Dùng font chủ đạo của trang */
+        font-size: 18px; /* Font này hơi nhỏ nên tăng size lên */
+        text-transform: uppercase; /* Chữ in hoa cho mạnh mẽ */
+        box-shadow: 0 4px 0px rgba(0,0,0,0.2); /* Hiệu ứng nút nổi khối 3D nhẹ */
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 1000;
+        letter-spacing: 1px;
+    }
+
+    .btn-nav:hover {
+        transform: translateY(2px); /* Hiệu ứng ấn xuống */
+        box-shadow: 0 2px 0px rgba(0,0,0,0.2);
+    }
+
+    /* Nút Quay lại (Góc Trái - Màu Xanh Đen) */
+    .btn-retour {
+        left: 20px;
+        background-color: #34495e; 
+        border-bottom: 4px solid #2c3e50; /* Tạo khối 3D */
+    }
+    
+    /* Nút Game (Góc Phải - Màu Cam Sáng Tạo) */
+    .btn-game {
+        right: 20px;
+        background-color: #e67e22; 
+        border-bottom: 4px solid #d35400; /* Tạo khối 3D */
+    }
+
+    /* Đẩy header xuống để không bị che */
+    header {
+        position: relative; 
+        padding-top: 70px; 
+    }
+
+    /* Responsive cho điện thoại */
+    @media (max-width: 650px) {
+        .btn-nav {
+            padding: 8px 12px;
+            font-size: 14px;
+            top: 15px;
+        }
+        .btn-retour { left: 10px; }
+        .btn-game { right: 10px; }
+    }
+</style>
+
+</head>
+
+<body>
+
+<!-- 1. NÚT QUAY LẠI -->
+<a href="wordle.html" class="btn-nav btn-retour">
+    &#8592; Retour
+</a>
+
+<!-- 2. NÚT ĐẾN GAME INNOVER -->
+<a href="game_innover.html" class="btn-nav btn-game">
+    Jeu Innover &#9654;
+</a>
+
+<header>
+    <h1>Innover</h1>
+    <p>Créer, imaginer, transformer et innover le monde.</p>
+</header>
+
+<section>
+<div class="container">
+
+    <h2>Pourquoi innover en numérique ?</h2>
+    <div class="definition">
+        Innover en numérique, c’est chercher à créer des outils plus
+        <b>simples, compréhensibles, efficaces et utiles</b>.
+        Cela permet d’améliorer l’expérience de chacun, de résoudre des problèmes
+        et de rendre la technologie plus accessible.
+    </div>
+
+    <h2>Mini-jeu : Explore le mot INNOVER</h2>
+<div class="jeu">
+    <p><b>Trouve les 7 valeurs cachées dans les lettres d’INNOVER :</b></p>
+
+    <ul id="reponses">
+        <li><b>I</b> → <span class="mask">I*********</span></li>
+        <li><b>N</b> → <span class="mask">N********</span></li>
+        <li><b>N</b> → <span class="mask">N*********</span></li>
+        <li><b>O</b> → <span class="mask">O*********</span></li>
+        <li><b>V</b> → <span class="mask">V********</span></li>
+        <li><b>E</b> → <span class="mask">E********</span></li>
+        <li><b>R</b> → <span class="mask">R**********</span></li>
+    </ul>
+
+    <button id="btnReponse" onclick="reveleMot()">Voir la prochaine réponse</button>
+
+    <p>Chaque lettre t’aide à comprendre ce qui permet d’innover.</p>
+</div>
+
+<div id="buttons_container">
+    <button onclick="genererIdee()">Générer une idée d’innovation</button>
+    <button id="btnIA" onclick="genererIA()">Générer avec l’IA</button>
+</div>
+
+<h3 id="idee"></h3>
+<h3 id="ideeIA"></h3>
+
+
+<footer>
+2025 – Ressource NIRDLE – Réagissez pour l'avenir.
+</footer>
+
+<script>
+const valeurs = [
+    "Imagination",
+    "Nouveauté",
+    "Nécessité",
+    "Ouverture",
+    "Vision",
+    "Essai",
+    "Recherche"
+];
+
+let indexMot = 0;
+
+function reveleMot() {
+    const spans = document.querySelectorAll("#reponses .mask");
+
+    if (indexMot < spans.length) {
+        spans[indexMot].textContent = valeurs[indexMot];
+        indexMot++;
+
+        if (indexMot === spans.length) {
+            document.getElementById("btnReponse").textContent = "Toutes les valeurs révélées !";
+            document.getElementById("btnReponse").disabled = true;
+        }
+    }
+}
+</script>
+
+
+
+<script>
+const idees = [
+    "Mettre en place un atelier pour apprendre à protéger ses données.",
+    "Installer des logiciels libres pour favoriser l’autonomie technologique.",
+    "Créer un tableau des bonnes pratiques de sobriété numérique en classe.",
+    "Encourager le tri et l’archivage responsable des fichiers.",
+    "Utiliser des outils accessibles pour inclure tous les élèves.",
+    "Réparer ou réutiliser du matériel avant d’en acheter du neuf.",
+    "Créer une charte numérique éthique avec les élèves.",
+    "Limiter la vidéo HD quand ce n’est pas nécessaire pour réduire l’empreinte carbone.",
+    "Sensibiliser à la citoyenneté numérique et à la vérification des sources.",
+    "Favoriser la collaboration avec des outils partagés et respectueux des données.",
+    "Valoriser des projets créatifs autour du numérique responsable.",
+    "Accompagner les enseignants dans le choix d’outils éthiques."
+];
+
+function genererIdee() {
+    const random = Math.floor(Math.random() * idees.length);
+    document.getElementById("idee").textContent = idees[random];
+}
+
+// Hàm placeholder cho nút IA để tránh lỗi nếu chưa có
+function genererIA() {
+    document.getElementById("ideeIA").textContent = "Fonctionnalité IA bientôt disponible...";
+}
+</script>
+
+</body>
+</html>

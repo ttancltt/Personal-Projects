@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atelier IA - Éco-conçu</title>
+    
+    <!-- GREEN IT : Chargement de la librairie ml5 (Version 0.12.2 conservée) -->
+    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+    
+    <style>
+        /* GREEN IT : Variables CSS pour une maintenance légère */
+        :root {
+            --bg: #121212;          /* Fond sombre (économie OLED) */
+            --text: #e0e0e0;        /* Texte clair lisible */
+            --card-bg: #1e1e1e;     /* Fond des conteneurs */
+            --border: #333;         /* Bordures subtiles */
+            --accent: #4caf50;      /* Vert écologique */
+            --btn-bg: #2c2c2c;      /* Fond boutons neutres */
+            --btn-active: #3e3e3e;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif; /* Pas de requête de police externe */
+            text-align: center;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        
+        h1 { color: var(--accent); margin-bottom: 5px; font-size: 1.8rem; }
+
+        /* Vidéo optimisée : Pas d'ombres, bordure fine */
+        #video-container { 
+            margin: 20px auto; 
+            width: 320px; 
+            height: 240px; 
+            border: 2px solid var(--border); 
+            background: #000;
+            /* Suppression des box-shadow pour réduire le repaint */
+        }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Contrôles et Boutons : Design "Flat" (Plat) */
+        .controls { margin-top: 15px; }
+
+        button { 
+            padding: 10px 20px; 
+            font-size: 1rem; 
+            margin: 8px; 
+            cursor: pointer; 
+            border: 1px solid var(--border); 
+            background: var(--btn-bg);
+            color: var(--text);
+            border-radius: 4px; 
+            font-weight: 600;
+        }
+        
+        button:hover { background: var(--btn-active); border-color: #666; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Bouton spécifique pour l'entraînement */
+        .btn-train { border-color: var(--accent); color: var(--accent); }
+        .btn-train:hover { background: rgba(76, 175, 80, 0.1); }
+        .btn-train:disabled { border-color: #555; color: #555; background: transparent; }
+
+        .btn-active { background: var(--accent) !important; color: #000 !important; }
+
+        /* Barre de progression simplifiée */
+        #progress-container { 
+            width: 320px; 
+            background-color: var(--card-bg); 
+            border: 1px solid var(--border);
+            margin: 15px auto; 
+            height: 20px; 
+            display: none; 
+        }
+        #progress-bar { 
+            width: 0%; 
+            height: 100%; 
+            background-color: var(--accent); 
+            text-align: center; 
+            line-height: 20px; 
+            color: #000; 
+            font-size: 12px; 
+        }
+        
+        /* Résultats */
+        #results { font-size: 1.2rem; font-weight: bold; margin-top: 15px; min-height: 30px; color: #ff9800;}
+        .ready-text { color: var(--accent) !important; }
+        .key-hint { font-size: 0.8rem; color: #888; display: block; margin-top: 2px;}
+
+        /* Guide d'utilisation : Adapté au Dark Mode */
+        .instructions {
+            max-width: 600px;
+            margin: 40px auto 20px;
+            background: var(--card-bg); /* Fond sombre */
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-align: left;
+        }
+        .instructions h2 { 
+            font-size: 1.2rem; 
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 10px; 
+            margin-top: 0; 
+            color: var(--accent);
+        }
+        .instructions ol { padding-left: 20px; color: #ccc; }
+        .instructions li { margin-bottom: 10px; }
+        .instructions strong { color: var(--text); }
+    </style>
+</head>
+<body>
+
+    <h1>Laboratoire d'IA : Apprentissage Machine</h1>
+    <p style="color: #888; font-size: 0.9rem;">Apprenez à l'ordinateur à distinguer deux objets !</p>
+    
+    <div id="video-container"></div>
+    
+    <div id="results">⏳ Chargement du modèle...</div>
+
+    <div id="progress-container">
+        <div id="progress-bar">0%</div>
+    </div>
+
+    <div class="controls">
+        <div style="display:inline-block">
+            <button class="btn-data" id="btnA" onclick="addExample('Objet A')">📸 Objet A (0)</button>
+            <span class="key-hint">(Touche <b>A</b>)</span>
+        </div>
+
+        <div style="display:inline-block">
+            <button class="btn-data" id="btnB" onclick="addExample('Objet B')">📸 Objet B (0)</button>
+            <span class="key-hint">(Touche <b>B</b>)</span>
+        </div>
+        
+        <br>
+        
+        <div style="display:inline-block">
+            <button class="btn-train" id="trainBtn" onclick="trainModel()">🚀 Entraîner l'IA</button>
+            <span class="key-hint">(Touche <b>Entrée</b>)</span>
+        </div>
+    </div>
+
+    <!-- GUIDE D'UTILISATION (Contenu conservé) -->
+    <div class="instructions">
+        <h2>📚 Guide d'utilisation</h2>
+        <ol>
+            <li>
+                <strong>Étape 1 : La Collecte (Données)</strong><br>
+                Montrez un premier objet (ex: un stylo) devant la caméra et appuyez plusieurs fois sur <b>A</b> (environ 15-20 images).<br>
+                Faites pareil avec un deuxième objet (ex: votre main) en appuyant sur <b>B</b>.
+            </li>
+            <li>
+                <strong>Étape 2 : L'Entraînement (Training)</strong><br>
+                Une fois que vous avez assez d'images, cliquez sur <b>"Entraîner l'IA"</b> (ou touche Entrée). Observez la barre de progression. L'ordinateur cherche les différences entre A et B.
+            </li>
+            <li>
+                <strong>Étape 3 : Le Test (Inférence)</strong><br>
+                Quand c'est fini, montrez les objets à nouveau. L'IA affichera ce qu'elle voit avec un <b>pourcentage de confiance</b>.
+            </li>
+        </ol>
+    </div>
+
+<script>
+        /* LOGIQUE IDENTIQUE À L'ORIGINAL */
+        let classifier;
+        let video;
+        let featureExtractor;
+        const totalEpochs = 50; 
+        let currentEpoch = 0;
+        let countA = 0;
+        let countB = 0;
+        let isTraining = false;
+        let isModelReady = false; 
+
+        function setup() {
+            video = document.createElement('video');
+            video.setAttribute('playsinline', '');
+            video.setAttribute('autoplay', '');
+            video.width = 320; 
+            video.height = 240;
+            document.getElementById('video-container').appendChild(video);
+
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                    video.srcObject = stream;
+                    video.play();
+                    featureExtractor = ml5.featureExtractor('MobileNet', { numEpochs: totalEpochs, topk: 3 }, modelLoaded);
+                    classifier = featureExtractor.classification(video, videoReady);
+                });
+            } else {
+                alert("Erreur: Impossible d'accéder à la caméra.");
+            }
+        }
+
+        function modelLoaded() {
+            isModelReady = true;
+            const res = document.getElementById('results');
+            res.innerText = "✅ Prêt ! Ajoutez des exemples.";
+            res.classList.add('ready-text');
+            console.log("Modèle chargé !");
+        }
+
+        function videoReady() { console.log("Vidéo prête"); }
+
+        document.addEventListener('keydown', function(event) {
+            if (isTraining) return;
+            const key = event.key.toLowerCase(); 
+            if (key === 'a') {
+                triggerButtonEffect('btnA');
+                addExample('Objet A');
+            } else if (key === 'b') {
+                triggerButtonEffect('btnB');
+                addExample('Objet B');
+            } else if (event.key === 'Enter') {
+                triggerButtonEffect('trainBtn');
+                trainModel();
+            }
+        });
+
+        function triggerButtonEffect(btnId) {
+            const btn = document.getElementById(btnId);
+            if(!btn.disabled) {
+                btn.classList.add('btn-active');
+                setTimeout(() => btn.classList.remove('btn-active'), 100);
+            }
+        }
+
+        function addExample(label) {
+            if (!isModelReady || !classifier) return; 
+            classifier.addImage(label);
+            
+            if(label === 'Objet A') {
+                countA++;
+                document.getElementById('btnA').innerText = `📸 Objet A (${countA})`;
+            } else {
+                countB++;
+                document.getElementById('btnB').innerText = `📸 Objet B (${countB})`;
+            }
+        }
+
+        function trainModel() {
+            if (!isModelReady) return;
+            if(countA < 3 || countB < 3) {
+                alert("Il faut au moins 3 images par objet !");
+                return;
+            }
+            isTraining = true;
+            document.getElementById('results').innerText = "💪 Entraînement...";
+            document.getElementById('results').classList.remove('ready-text');
+            document.getElementById('progress-container').style.display = "block";
+            document.getElementById('trainBtn').disabled = true;
+            
+            currentEpoch = 0;
+
+            classifier.train((loss) => {
+                if (loss === null) {
+                    updateProgressBar(100);
+                    document.getElementById('results').innerText = "🎉 Terminé ! Testez maintenant.";
+                    document.getElementById('results').classList.add('ready-text');
+                    document.getElementById('trainBtn').innerText = "Entraînement Fini";
+                    classify(); 
+                } else {
+                    currentEpoch++;
+                    let percentage = Math.floor((currentEpoch / totalEpochs) * 100);
+                    if (percentage > 99) percentage = 99;
+                    updateProgressBar(percentage);
+                }
+            });
+        }
+
+        function updateProgressBar(percent) {
+            const bar = document.getElementById('progress-bar');
+            bar.style.width = percent + '%';
+            bar.innerText = percent + '%';
+        }
+
+        function classify() {
+            classifier.classify((err, results) => {
+                if (err) {
+                    console.error(err);
+                } else {
+                    const label = results[0].label;
+                    const confidence = (results[0].confidence * 100).toFixed(1);
+                    document.getElementById('results').innerText = `Je vois : ${label} (${confidence}%)`;
+                    classify(); 
+                }
+            });
+        }
+
+        setup();
+    </script>
+</body>
+</html>

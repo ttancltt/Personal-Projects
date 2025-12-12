@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mots Croisés NIRD - Fixed</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --cell-bg: #2d2d2d;
+            --accent: #4caf50; 
+            --highlight: #fbc02d;
+            --error: #ef5350;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { color: var(--accent); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+        p.subtitle { color: #888; font-size: 0.9em; margin-bottom: 20px; font-style: italic; }
+
+        /* Container bao quanh lưới */
+        #grid-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 8px;
+            border: 1px solid #333;
+            /* QUAN TRỌNG: Căn giữa container chính */
+            margin: 0 auto;
+        }
+
+        .row {
+            display: flex;
+            /* SỬA LỖI: Dùng flex-start để căn từ trái sang, 
+               nhưng vì ta đã tính toán Spacer chuẩn nên nó sẽ thẳng hàng */
+            justify-content: flex-start; 
+            gap: 5px;
+        }
+
+        input.cell {
+            width: 35px;
+            height: 35px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            background-color: var(--cell-bg);
+            color: var(--text);
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 0;
+            outline: none;
+        }
+
+        input.cell:focus { border-color: var(--accent); background: #333; }
+        
+        input.cell.main-col {
+            border: 2px solid var(--highlight);
+            background-color: rgba(251, 192, 45, 0.1);
+        }
+
+        /* Ô trống tàng hình */
+        .spacer { width: 35px; height: 35px; visibility: hidden; }
+
+        .divider-row { height: 10px; background: transparent; }
+
+        #clue-box {
+            background: #252525;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            width: 100%;
+            max-width: 500px;
+            min-height: 50px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { opacity: 0.9; }
+
+        .correct { background-color: var(--accent) !important; color: white !important; }
+        .wrong { border-color: var(--error) !important; color: var(--error) !important; }
+        #result-msg { margin-top: 15px; font-weight: bold; font-size: 1.2em; min-height: 1.5em; }
+    </style>
+</head>
+<body>
+
+    <h1>Mots Croisés NIRD</h1>
+    <p class="subtitle">Trouvez le mot caché vertical : LINUX OS</p>
+
+    <div id="clue-box">Cliquez sur une case pour voir l'indice...</div>
+    <div id="grid-container"></div>
+    <button onclick="checkAnswers()">Valider</button>
+    <div id="result-msg"></div>
+
+    <script>
+        const gameData = [
+            { word: "LIBRE", pivotIndex: 0, clue: "Qualité d'un logiciel qui respecte la liberté (comme Linux)." },
+            { word: "CLIMAT", pivotIndex: 2, clue: "Ce qui se réchauffe à cause de la production excessive." },
+            { word: "GREENIT", pivotIndex: 4, clue: "Démarche pour réduire l'empreinte écologique du numérique." },
+            { word: "SAUVER", pivotIndex: 2, clue: "Action de ne pas jeter un vieux PC." },
+            { word: "TOXIQUE", pivotIndex: 2, clue: "Nature des déchets électroniques." },
+            { isSpace: true }, 
+            { word: "ORDINATEUR", pivotIndex: 0, clue: "Sa fabrication émet 300kg de CO2." }, // Từ này dài nhất -> gây lỗi cũ
+            { word: "SOBRIETE", pivotIndex: 0, clue: "Modération dans la consommation numérique." }
+        ];
+
+        // CẤU HÌNH CĂN CHỈNH
+        const CENTER_COL = 4; // Vị trí cột dọc (index 4 = cột thứ 5)
+        const GRID_WIDTH = 16; // Tổng số ô cố định cho mọi hàng (để tránh bị lệch)
+
+        const gridContainer = document.getElementById('grid-container');
+        const clueBox = document.getElementById('clue-box');
+
+        function initGrid() {
+            gameData.forEach((row, rowIndex) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+
+                if (row.isSpace) {
+                    rowDiv.classList.add('divider-row');
+                    gridContainer.appendChild(rowDiv);
+                    return;
+                }
+
+                // 1. Tính toán Spacer bên trái
+                const emptySlotsLeft = CENTER_COL - row.pivotIndex;
+                for (let i = 0; i < emptySlotsLeft; i++) {
+                    createSpacer(rowDiv);
+                }
+
+                // 2. Tạo các ô chữ
+                for (let i = 0; i < row.word.length; i++) {
+                    const input = document.createElement('input');
+                    input.className = 'cell';
+                    input.maxLength = 1;
+                    input.dataset.letter = row.word[i];
+                    
+                    if (i === row.pivotIndex) input.classList.add('main-col');
+
+                    input.addEventListener('focus', () => {
+                        clueBox.innerText = `Indice : ${row.clue}`;
+                    });
+
+                    // Tự động nhảy ô
+                    input.addEventListener('input', (e) => {
+                        if (e.target.value.length === 1) {
+                            const next = input.nextElementSibling;
+                            if (next && next.tagName === 'INPUT') next.focus();
+                        }
+                    });
+                    
+                    // Backspace
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && e.target.value === '') {
+                            const prev = input.previousElementSibling;
+                            if (prev && prev.tagName === 'INPUT') prev.focus();
+                        }
+                    });
+
+                    rowDiv.appendChild(input);
+                }
+
+                // 3. QUAN TRỌNG: Tính toán và thêm Spacer bên phải
+                // Tổng width phải luôn bằng GRID_WIDTH
+                const currentWidth = emptySlotsLeft + row.word.length;
+                const emptySlotsRight = GRID_WIDTH - currentWidth;
+
+                for(let j=0; j < emptySlotsRight; j++){
+                    createSpacer(rowDiv);
+                }
+
+                gridContainer.appendChild(rowDiv);
+            });
+        }
+
+        function createSpacer(parent) {
+            const div = document.createElement('div');
+            div.className = 'spacer';
+            parent.appendChild(div);
+        }
+
+        function checkAnswers() {
+            const inputs = document.querySelectorAll('input.cell');
+            let allCorrect = true;
+            let filled = 0;
+
+            inputs.forEach(input => {
+                const val = input.value.toUpperCase();
+                if(val) filled++;
+                
+                if (val === input.dataset.letter) {
+                    input.classList.add('correct');
+                    input.classList.remove('wrong');
+                } else {
+                    if(val) input.classList.add('wrong');
+                    input.classList.remove('correct');
+                    allCorrect = false;
+                }
+            });
+
+            const msg = document.getElementById('result-msg');
+            if(filled < inputs.length) {
+                msg.innerText = "Remplissez tout !";
+                msg.style.color = "#ffa726";
+            } else if (allCorrect) {
+                msg.innerText = "BRAVO ! LINUX OS est la clé !";
+                msg.style.color = "#4caf50";
+            } else {
+                msg.innerText = "Erreur(s) détectée(s)...";
+                msg.style.color = "#ef5350";
+            }
+        }
+
+        initGrid();
+    </script>
+</body>
+</html>

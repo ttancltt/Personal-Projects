@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bataille du Stockage : HDD vs SSD</title>
+    <style>
+        /* GREEN IT STYLE : Mode Sombre & Minimaliste */
+        :root {
+            --bg: #1a1a1a;
+            --text: #e0e0e0;
+            --hdd-color: #ff9800; /* Orange */
+            --ssd-color: #2196f3; /* Bleu */
+            --card-bg: #2d2d2d;
+            --success: #66bb6a;
+            --error: #ef5350;
+            --warning: #ffa726;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.6;
+        }
+
+        main { max-width: 900px; width: 100%; }
+
+        h1 { color: var(--success); text-align: center; margin-bottom: 10px; }
+        h2 { border-bottom: 1px solid #444; padding-bottom: 5px; }
+
+        /* PHẦN GIỚI THIỆU */
+        .intro-box {
+            background: #252525;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid var(--success);
+            margin-bottom: 30px;
+        }
+        .intro-title { font-weight: bold; font-size: 1.2em; color: var(--success); display: block; margin-bottom: 10px; }
+
+        /* GAME ZONE */
+        #fact-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            border: 2px dashed #555;
+            border-radius: 8px;
+            min-height: 80px;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: #222;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: grab;
+            border: 1px solid #444;
+            user-select: none;
+            font-size: 0.95em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        .card:active { cursor: grabbing; transform: scale(1.05); }
+
+        .columns-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 300px;
+            min-height: 350px;
+            border-radius: 8px;
+            padding: 15px;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            transition: background 0.3s;
+        }
+
+        .col-hdd { border-color: var(--hdd-color); }
+        .col-ssd { border-color: var(--ssd-color); }
+        
+        .col-header { font-weight: bold; font-size: 1.2em; margin-bottom: 5px; }
+        .col-desc { font-size: 0.85em; color: #aaa; margin-bottom: 15px; text-align: center; }
+
+        .col-content {
+            flex: 1; width: 100%;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+
+        .column.drag-over { background: rgba(255,255,255,0.1); }
+
+        .btn-submit {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 40px;
+            font-size: 1.1em;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-submit:hover { opacity: 0.9; }
+
+        /* KẾT QUẢ */
+        #result {
+            margin-top: 30px;
+            display: none;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        .feedback-item { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .explanation {
+            font-size: 0.9em; margin-top: 5px; color: #ccc;
+            padding-left: 10px; border-left: 3px solid #666;
+        }
+        .correct { color: var(--success); font-weight: bold; }
+        .wrong { color: var(--error); font-weight: bold; }
+
+        /* PHẦN BONUS: THẺ NHỚ */
+        .sd-card-section {
+            margin-top: 50px;
+            padding: 20px;
+            background: rgba(255, 167, 38, 0.1);
+            border-radius: 8px;
+            border: 1px solid var(--warning);
+        }
+        .sd-title { color: var(--warning); font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
+        .sd-list li { margin-bottom: 8px; }
+
+    </style>
+</head>
+<body>
+
+<main>
+    <h1>💾 Le Choix Responsable : HDD ou SSD ?</h1>
+
+    <!-- 1. PHẦN MỞ ĐẦU -->
+    <section class="intro-box">
+        <span class="intro-title">Pourquoi ce choix est-il éthique ?</span>
+        <p>
+            Dans une démarche <strong>NIRD (Numérique Responsable)</strong>, choisir le bon stockage ne se résume pas à la performance. 
+            C'est une question de durabilité : 
+            <br>1. Installer un disque rapide (SSD) peut sauver un vieil ordinateur de la décharge.
+            <br>2. Choisir un disque robuste évite la casse et les déchets électroniques.
+            <br>3. Optimiser le budget de l'école permet d'investir ailleurs.
+        </p>
+        <p style="font-style: italic; color: #aaa;">Mission : Glissez les caractéristiques dans la bonne colonne pour comprendre les enjeux.</p>
+    </section>
+
+    <!-- 2. TRÒ CHƠI -->
+    <div id="fact-pool" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <!-- Les cartes sont générées par JS -->
+    </div>
+
+    <div class="columns-container">
+        <!-- Cột HDD -->
+        <div class="column col-hdd" id="hdd-zone" 
+             ondrop="drop(event)" ondragover="allowDrop(event)" 
+             ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
+            <span class="col-header" style="color: var(--hdd-color)">HDD (Disque Dur Mécanique)</span>
+            <span class="col-desc">Idéal pour l'archivage de masse à petit prix</span>
+            <div class="col-content"></div>
+        </div>
+
+        <!-- Cột SSD -->
+        <div class="column col-ssd" id="ssd-zone" 
+             ondrop="drop(event)" ondragover="allowDrop(event)" 
+             ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
+            <span class="col-header" style="color: var(--ssd-color)">SSD (Disque à État Solide)</span>
+            <span class="col-desc">Idéal pour la rapidité et la mobilité</span>
+            <div class="col-content"></div>
+        </div>
+    </div>
+
+    <button class="btn-submit" onclick="checkAnswers()">🔍 Valider mes choix</button>
+
+    <!-- KẾT QUẢ -->
+    <div id="result">
+        <h3 id="score-display"></h3>
+        <div id="feedback-list"></div>
+    </div>
+
+    <!-- 3. PHẦN MỞ RỘNG: THẺ NHỚ -->
+    <section class="sd-card-section">
+        <div class="sd-title">⚠️ Bonus : Les erreurs fréquentes avec les cartes SD</div>
+        <p>Le stockage flash (comme les SSD) existe aussi sous forme de cartes SD. Voici les pièges à éviter :</p>
+        <ul class="sd-list">
+            <li>
+                <strong>L'erreur d'Endurance :</strong> Ne mettez jamais une carte SD standard dans une caméra de surveillance ou un Raspberry Pi (serveur). Elles grillent vite à cause des écritures en continu.
+                <br><em>👉 Solution : Achetez des cartes mentionnant "High Endurance" ou "Industrial".</em>
+            </li>
+            <li>
+                <strong>Le piège de la Capacité (Contrefaçons) :</strong> Une carte de "2TB" à 10€ est une arnaque. Elle affichera 2TB mais écrasera vos données après 16GB.
+                <br><em>👉 Solution : Achetez uniquement des marques reconnues (SanDisk, Samsung, Kingston) chez des revendeurs fiables.</em>
+            </li>
+            <li>
+                <strong>La confusion des Classes :</strong> Une carte "Class 10" peut être trop lente pour filmer en 4K.
+                <br><em>👉 Solution : Regardez les normes V30, V60 ou V90 pour la vidéo, et A1/A2 pour lancer des applications.</em>
+            </li>
+        </ul>
+    </section>
+
+</main>
+
+<script>
+    // DATA EN FRANÇAIS
+    const gameData = [
+        { 
+            id: 1, text: "Coût par Go le plus bas", type: "hdd-zone", 
+            explain: "Éthique budgétaire : Les HDD restent bien moins chers pour stocker des téraoctets de données (sauvegardes d'école)." 
+        },
+        { 
+            id: 2, text: "Résistant aux chocs physiques", type: "ssd-zone", 
+            explain: "Durabilité : Sans pièces mobiles, un SSD survit mieux si un élève fait tomber son ordinateur portable." 
+        },
+        { 
+            id: 3, text: "Démarrage ultra-rapide", type: "ssd-zone", 
+            explain: "Anti-Obsolescence : Remplacer un vieux HDD par un SSD est le meilleur moyen de prolonger la vie d'un vieux PC de 3 à 5 ans." 
+        },
+        { 
+            id: 4, text: "Récupération de données (Panne)", type: "hdd-zone", 
+            explain: "Maintenance : En cas de panne mécanique, il est souvent plus facile (et moins cher) de récupérer des données sur un HDD que sur un SSD." 
+        },
+        { 
+            id: 5, text: "Faible consommation d'énergie", type: "ssd-zone", 
+            explain: "Green IT : Un SSD consomme moins, prolongeant l'autonomie de la batterie et réduisant la consommation électrique globale." 
+        },
+        { 
+            id: 6, text: "Bruit et vibrations", type: "hdd-zone", 
+            explain: "Confort : Un HDD contient des plateaux qui tournent à 5400/7200 tours/min, créant du bruit et de la chaleur." 
+        }
+    ];
+
+    // INITIALISATION DU JEU
+    const pool = document.getElementById('fact-pool');
+    
+    // Mélanger les cartes
+    gameData.sort(() => Math.random() - 0.5);
+
+    gameData.forEach(item => {
+        const el = document.createElement('div');
+        el.classList.add('card');
+        el.innerText = item.text;
+        el.draggable = true;
+        el.id = "card-" + item.id;
+        el.dataset.target = item.type;
+        el.dataset.explain = item.explain;
+        
+        el.addEventListener('dragstart', (ev) => {
+            ev.dataTransfer.setData("text", ev.target.id);
+        });
+        pool.appendChild(el);
+    });
+
+    // LOGIQUE DRAG & DROP
+    function allowDrop(ev) { ev.preventDefault(); }
+
+    function dragEnter(ev) {
+        let target = ev.target.closest('.column');
+        if (target) target.classList.add('drag-over');
+    }
+
+    function dragLeave(ev) {
+        let target = ev.target.closest('.column');
+        if (target) target.classList.remove('drag-over');
+    }
+
+    function drop(ev) {
+        ev.preventDefault();
+        const data = ev.dataTransfer.getData("text");
+        const card = document.getElementById(data);
+        
+        let dropZone = ev.target.closest('.column') || ev.target.closest('#fact-pool');
+        
+        if (dropZone) {
+            dropZone.classList.remove('drag-over');
+            if (dropZone.classList.contains('column')) {
+                dropZone.querySelector('.col-content').appendChild(card);
+            } else {
+                dropZone.appendChild(card);
+            }
+        }
+    }
+
+    // VÉRIFICATION DES RÉPONSES
+    function checkAnswers() {
+        const resultDiv = document.getElementById('result');
+        const feedbackList = document.getElementById('feedback-list');
+        const scoreDisplay = document.getElementById('score-display');
+        
+        feedbackList.innerHTML = "";
+        let correctCount = 0;
+        let total = gameData.length;
+        let allPlaced = true;
+
+        const cards = document.querySelectorAll('.card');
+
+        cards.forEach(card => {
+            const parent = card.parentElement.parentElement; // .col-content -> .column
+            
+            if (!parent.classList.contains('column')) {
+                allPlaced = false;
+                return;
+            }
+
+            const isCorrect = parent.id === card.dataset.target;
+            const statusText = isCorrect ? "<span class='correct'>CORRECT</span>" : "<span class='wrong'>INCORRECT</span>";
+            
+            if (isCorrect) correctCount++;
+
+            const feedbackItem = document.createElement('div');
+            feedbackItem.classList.add('feedback-item');
+            feedbackItem.innerHTML = `
+                <div><strong>${card.innerText}</strong> : ${statusText}</div>
+                <div class="explanation">👉 ${card.dataset.explain}</div>
+            `;
+            feedbackList.appendChild(feedbackItem);
+        });
+
+        if (!allPlaced) {
+            alert("Veuillez placer toutes les cartes dans les colonnes avant de valider !");
+            return;
+        }
+
+        scoreDisplay.innerText = `Votre Score : ${correctCount} / ${total}`;
+        if(correctCount === total) {
+            scoreDisplay.innerHTML += " 🏆 <br><span style='font-size:0.8em; color:var(--success)'>Excellent ! Vous êtes prêt pour le Numérique Responsable.</span>";
+        }
+        
+        resultDiv.style.display = "block";
+        resultDiv.scrollIntoView({ behavior: "smooth" });
+    }
+</script>
+
+</body>
+</html>

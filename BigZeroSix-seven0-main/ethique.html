@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Éthique</title>
+<link href="style_ethique.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+
+<style>
+    /* --- CSS CHO CÁC NÚT ĐIỀU HƯỚNG --- */
+    
+    .btn-nav {
+        position: absolute;
+        top: 20px;
+        text-decoration: none;
+        color: white;
+        padding: 8px 20px; /* Padding gọn hơn vì font Bebas cao */
+        border-radius: 5px; /* Bo góc nhẹ cho hợp với font cứng cáp */
+        font-family: 'Bebas Neue', sans-serif; /* Dùng font của trang */
+        font-size: 20px; /* Font này cần size to một chút mới đẹp */
+        letter-spacing: 1px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 1000;
+        line-height: 1; /* Căn giữa chiều cao dòng */
+    }
+
+    .btn-nav:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Nút Quay lại (Góc Trái - Màu Đen Xám) */
+    .btn-retour {
+        left: 20px;
+        background-color: #2c3e50; 
+    }
+    .btn-retour:hover {
+        background-color: #34495e;
+    }
+
+    /* Nút Game (Góc Phải - Màu Tím Xanh đại diện cho Đạo đức/Trí tuệ) */
+    .btn-game {
+        right: 20px;
+        background-color: #6c5ce7; 
+    }
+    .btn-game:hover {
+        background-color: #8e44ad;
+    }
+
+    /* Đẩy header xuống để không bị che */
+    header {
+        position: relative; 
+        padding-top: 60px; 
+    }
+
+    /* Responsive cho điện thoại */
+    @media (max-width: 600px) {
+        .btn-nav {
+            padding: 6px 12px;
+            font-size: 16px;
+            top: 15px;
+        }
+        .btn-retour { left: 10px; }
+        .btn-game { right: 10px; }
+    }
+</style>
+
+</head>
+
+<body>
+
+<!-- 1. NÚT QUAY LẠI -->
+<a href="wordle.html" class="btn-nav btn-retour">
+    &#8592; RETOUR WORDLE
+</a>
+
+<!-- 2. NÚT ĐẾN GAME ÉTHIQUE -->
+<a href="game_ethique.html" class="btn-nav btn-game">
+    JEU ÉTHIQUE &#9654;
+</a>
+
+<header>
+    <h1>Éthique</h1>
+    <p>Utiliser le numérique avec éthique</p>
+</header>
+
+<section>
+<div class="container">
+
+    <h2>Qu’est-ce que l’éthique numérique ?</h2>
+    <div class="definition">
+        L’éthique numérique consiste à utiliser la technologie de manière 
+        <b>responsable, inclusive, durable et humaine</b>.  
+        Elle encourage les choix éclairés, la protection des données, le respect 
+        d’autrui et la sobriété numérique.  
+    </div>
+
+    <h2>Mini-jeu : Explore le mot ÉTHIQUE</h2>
+    <div class="jeu">
+        <p><b>Trouve les 7 valeurs cachées dans les lettres d’ÉTHIQUE :</b></p>
+
+        <!-- LISTE AVEC MOTS PARTIELLEMENT MASQUÉS -->
+        <ul id="reponses">
+            <li><b>E</b> → <span class="mask">É*****</span></li>
+            <li><b>T</b> → <span class="mask">T***********</span></li>
+            <li><b>H</b> → <span class="mask">H*******</span></li>
+            <li><b>I</b> → <span class="mask">I********</span></li>
+            <li><b>Q</b> → <span class="mask">Q******</span></li>
+            <li><b>U</b> → <span class="mask">U**** R**********</span></li>
+            <li><b>E</b> → <span class="mask">E*******</span></li>
+        </ul>
+
+        <button id="btnReponse" onclick="reveleMot()">Voir la prochaine réponse</button>
+
+        <p>Chaque lettre est une porte vers une attitude numérique constructive.</p>
+    </div>
+</section>
+
+<div id = "button_idee">
+<button onclick="genererIdee()">Générer une idée de valeur éthique</button>
+</div>
+    <h3 id="idee"></h3>
+
+
+
+<footer>
+© 2025 – Ressource NIRDLE – Réagissez pour l'avenir.
+</footer>
+<script>
+
+const valeurs = [
+    "Équité",
+    "Transparence",
+    "Humanité",
+    "Inclusion",
+    "Qualité",
+    "Usage responsable",
+    "Empathie"
+];
+
+let indexMot = 0;
+
+
+function reveleMot() {
+    const spans = document.querySelectorAll("#reponses .mask");
+
+    if (indexMot < spans.length) {
+        spans[indexMot].textContent = valeurs[indexMot];
+        indexMot++;
+
+        if (indexMot === spans.length) {
+            document.getElementById("btnReponse").textContent = "Toutes les réponses révélées !";
+            document.getElementById("btnReponse").disabled = true;
+        }
+    }
+}
+</script>
+
+
+<script>
+const idees = [
+    "Mettre en place un atelier pour apprendre à protéger ses données.",
+    "Installer des logiciels libres pour favoriser l’autonomie technologique.",
+    "Créer un tableau des bonnes pratiques de sobriété numérique en classe.",
+    "Encourager le tri et l’archivage responsable des fichiers.",
+    "Utiliser des outils accessibles pour inclure tous les élèves.",
+    "Réparer ou réutiliser du matériel avant d’en acheter du neuf.",
+    "Créer une charte numérique éthique avec les élèves.",
+    "Limiter la vidéo HD quand ce n’est pas nécessaire pour réduire l’empreinte carbone.",
+    "Sensibiliser à la citoyenneté numérique et à la vérification des sources.",
+    "Favoriser la collaboration avec des outils partagés et respectueux des données.",
+    "Valoriser des projets créatifs autour du numérique responsable.",
+    "Accompagner les enseignants dans le choix d’outils éthiques."
+];
+
+function genererIdee() {
+    const random = Math.floor(Math.random() * idees.length);
+    document.getElementById("idee").textContent = idees[random];
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRD Wordle - Mode Expert</title>
+    <style>
+        /* LIGHT MODE - Giao diện sáng */
+        :root {
+            --bg: #f0f4f8;          
+            --text: #2c3e50;        
+            --card-bg: #ffffff;     
+            --border: #dce1e6;
+            --accent: #3498db;      
+            --correct: #2ecc71;     /* Xanh lá */
+            --present: #f1c40f;     /* Vàng */
+            --absent: #95a5a6;      /* Xám */
+            --btn-text: #fff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* --- CSS CHO NÚT HOME (MỚI THÊM) --- */
+        .btn-home {
+            position: absolute; /* Cố định vị trí tuyệt đối */
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            background-color: #2c3e50; /* Màu tối sang trọng */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px; /* Bo tròn mềm mại */
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Khoảng cách giữa icon và chữ */
+            z-index: 1000;
+        }
+
+        .btn-home:hover {
+            background-color: #34495e;
+            transform: translateY(-2px); /* Hiệu ứng nhấc nhẹ */
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Responsive: Đẩy nội dung xuống khi màn hình nhỏ để không bị nút che */
+        @media (max-width: 600px) {
+            header { margin-top: 50px; }
+            .btn-home { padding: 8px 12px; font-size: 12px; top: 15px; left: 15px; }
+        }
+        /* ------------------------------------ */
+
+        header {
+            max-width: 700px;
+            text-align: center;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        h1 { color: var(--accent); margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .intro-text { font-size: 1.1em; line-height: 1.6; color: #555; font-style: italic; }
+        .highlight { color: var(--accent); font-weight: bold; }
+
+        #hint-box {
+            background: #e8f4fd;
+            border-left: 5px solid var(--accent);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+        #word-info { font-weight: bold; font-size: 1.2em; display: block; margin-bottom: 5px; }
+        #clue-text { font-style: italic; color: #555; }
+
+        #game-board {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .row { display: flex; gap: 8px; justify-content: center; }
+
+        .tile {
+            width: 55px;
+            height: 55px;
+            border: 2px solid var(--border);
+            background: #f9f9f9;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer; /* Cho phép click */
+            overflow: hidden;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .tile img {
+            width: 100%; 
+            height: 100%;
+            object-fit: contain; /* Đảm bảo ảnh nằm gọn trong ô */
+            display: block;
+        }
+
+        .tile.active { border-color: var(--accent); box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); background: #fff; }
+
+        .tile.correct { background-color: var(--correct); border-color: var(--correct); }
+        .tile.present { background-color: var(--present); border-color: var(--present); }
+        .tile.absent { background-color: var(--absent); border-color: var(--absent); }
+
+        .controls { display: flex; gap: 10px; }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--btn-text);
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.95); }
+
+        .btn-submit { background: var(--accent); }
+        .btn-submit:hover { background: #2980b9; }
+
+        .btn-restart { background: #e74c3c; display: none; }
+        
+        #message { height: 25px; margin-top: 10px; font-weight: bold; color: #e74c3c; }
+
+        .tips-section {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NÚT HOME ĐƯỢC THÊM VÀO ĐÂY -->
+    <a href="home.html" class="btn-home">
+        <span>🏠</span> Accueil
+    </a>
+
+    <header>
+        <h1>Défi Lexical NIRD</h1>
+        <p class="intro-text">
+            "Vous avez choisi le <span class="highlight">mode expert</span> pour approfondir ce sujet. 
+            Nous saluons votre esprit d'apprentissage ! 
+            Retrouvons-nous dans la victoire pour célébrer votre réussite !"
+        </p>
+    </header>
+
+    <div id="hint-box">
+        <span id="word-info">Mot mystère</span>
+        <span id="clue-text">Indice...</span>
+    </div>
+
+    <div id="message"></div>
+
+    <div id="game-board"></div>
+
+    <div class="controls">
+        <button class="btn-submit" id="submit-btn" onclick="checkRow()">VALIDER (Submit)</button>
+        <button class="btn-restart" id="restart-btn" onclick="location.reload()">REJOUER</button>
+    </div>
+
+    <div class="tips-section">
+        <strong>💡 Astuce :</strong> 
+        Cliquez sur une case et tapez votre lettre. <br>
+        <span style="color:var(--correct); font-weight:bold">Vert</span> = Correct, 
+        <span style="color:var(--present); font-weight:bold">Jaune</span> = Mauvaise place.
+    </div>
+
+    <script>
+        // CẤU HÌNH DATA
+        const DATA = [
+            { word: "DURABLE", hint: "Qui dure dans le temps et respecte l'environnement." },
+            { word: "ETHIQUE", hint: "Ensemble de principes moraux (faire le bien)." },
+            { word: "INNOVER", hint: "Créer quelque chose de nouveau ou changer les choses." },
+            { word: "PROTEGER", hint: "Défendre quelqu'un ou quelque chose contre un danger." },
+            { word: "RECYCLER", hint: "Donner une seconde vie aux déchets." },
+            { word: "APPRENDRE", hint: "Acquérir des connaissances ou des compétences." }
+        ];
+
+        // Chọn từ ngẫu nhiên
+        const SESSION = DATA[Math.floor(Math.random() * DATA.length)];
+        const TARGET = SESSION.word;
+        const LEN = TARGET.length;
+        const ROWS = 5;
+
+        let currentRow = 0;
+        let currentCol = 0;
+        let isGameOver = false;
+
+        const board = document.getElementById('game-board');
+
+        // Debug (Xóa khi thi thật)
+        console.log("Solution:", TARGET);
+
+        function init() {
+            // Hiển thị gợi ý
+            document.getElementById('word-info').innerText = `Mot mystère (${LEN} lettres)`;
+            document.getElementById('clue-text').innerText = `Indice : "${SESSION.hint}"`;
+
+            // Vẽ lưới
+            for (let r = 0; r < ROWS; r++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+                for (let c = 0; c < LEN; c++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.id = `cell-${r}-${c}`;
+                    tile.dataset.letter = ""; 
+                    
+                    // Click vào ô để nhập
+                    tile.onclick = () => setFocus(r, c);
+                    
+                    rowDiv.appendChild(tile);
+                }
+                board.appendChild(rowDiv);
+            }
+            
+            highlightCell(0, 0);
+            document.addEventListener('keydown', handleKey);
+        }
+
+        // --- XỬ LÝ ẢNH & ĐƯỜNG DẪN ---
+        function getImgPath(char) {
+            // char là ký tự chữ cái (A, B, C...)
+            // Dựa theo ảnh màn hình: File tên là A1.png, B1.png...
+            // Đường dẫn: Từ Sources (nơi chứa html) -> ra ngoài (..) -> vào Images -> vào Letters
+            return `../Images/Letters/${char}1.png`;
+        }
+
+        function handleKey(e) {
+            if (isGameOver) return;
+            const key = e.key.toUpperCase();
+
+            // Nhập chữ cái (A-Z)
+            if (key.length === 1 && key >= 'A' && key <= 'Z') {
+                insertLetter(key);
+            } 
+            else if (key === 'BACKSPACE') {
+                deleteLetter();
+            } 
+            else if (key === 'ENTER') {
+                checkRow();
+            }
+            else if (key === 'ARROWLEFT') {
+                if (currentCol > 0) setFocus(currentRow, currentCol - 1);
+            }
+            else if (key === 'ARROWRIGHT') {
+                if (currentCol < LEN - 1) setFocus(currentRow, currentCol + 1);
+            }
+        }
+
+        function insertLetter(char) {
+            const cell = document.getElementById(`cell-${currentRow}-${currentCol}`);
+            
+            cell.dataset.letter = char;
+            cell.innerHTML = ""; 
+
+            // TẠO ẢNH
+            const img = document.createElement('img');
+            img.src = getImgPath(char); 
+            img.alt = char;
+            
+            // Xử lý lỗi nếu ảnh không tồn tại
+            img.onerror = function() { 
+                this.style.display='none'; 
+                cell.innerText = char; // Hiện chữ nếu lỗi ảnh
+            };
+
+            cell.appendChild(img);
+
+            // Nhảy ô tiếp theo
+            if (currentCol < LEN - 1) {
+                setFocus(currentRow, currentCol + 1);
+            }
+        }
+
+        function deleteLetter() {
+            const cell = document.getElementById(`cell-${currentRow}-${currentCol}`);
+            if (cell.dataset.letter) {
+                cell.innerHTML = "";
+                cell.dataset.letter = "";
+            } else if (currentCol > 0) {
+                setFocus(currentRow, currentCol - 1);
+                const prevCell = document.getElementById(`cell-${currentRow}-${currentCol}`);
+                prevCell.innerHTML = "";
+                prevCell.dataset.letter = "";
+            }
+        }
+
+        function setFocus(r, c) {
+            if (r !== currentRow) return;
+            currentCol = c;
+            document.querySelectorAll('.tile').forEach(t => t.classList.remove('active'));
+            highlightCell(r, c);
+        }
+
+        function highlightCell(r, c) {
+            const cell = document.getElementById(`cell-${r}-${c}`);
+            if(cell) cell.classList.add('active');
+        }
+
+        // --- KIỂM TRA KẾT QUẢ ---
+        function checkRow() {
+            let guess = "";
+            for (let c = 0; c < LEN; c++) {
+                const cell = document.getElementById(`cell-${currentRow}-${c}`);
+                guess += (cell.dataset.letter || "");
+            }
+
+            if (guess.length !== LEN) {
+                showMessage("Mot incomplet ! (Chưa đủ ký tự)");
+                return;
+            }
+
+            const targetArr = TARGET.split('');
+            const guessArr = guess.split('');
+            const status = new Array(LEN).fill('absent');
+
+            // 1. Check Đúng (Xanh)
+            for (let i = 0; i < LEN; i++) {
+                if (guessArr[i] === targetArr[i]) {
+                    status[i] = 'correct';
+                    targetArr[i] = null;
+                    guessArr[i] = null;
+                }
+            }
+
+            // 2. Check Sai chỗ (Vàng)
+            for (let i = 0; i < LEN; i++) {
+                if (guessArr[i] !== null) {
+                    const idx = targetArr.indexOf(guessArr[i]);
+                    if (idx !== -1) {
+                        status[i] = 'present';
+                        targetArr[idx] = null;
+                    }
+                }
+            }
+
+            // 3. Tô màu
+            for (let i = 0; i < LEN; i++) {
+                const cell = document.getElementById(`cell-${currentRow}-${i}`);
+                cell.classList.remove('active');
+                setTimeout(() => {
+                    cell.classList.add(status[i]);
+                    // Làm ảnh sáng trắng lên khi có màu nền
+                    if(cell.querySelector('img')) {
+                        cell.querySelector('img').style.filter = "brightness(0) invert(1)"; 
+                    }
+                }, i * 100);
+            }
+
+            if (guess === TARGET) {
+                isGameOver = true;
+                showMessage("🎉 BRAVO ! Redirection...");
+                setTimeout(() => {
+                    // Chuyển hướng đến file html trong cùng thư mục Sources
+                    window.location.href = `${TARGET.toLowerCase()}.html`;
+                }, 2000);
+            } else {
+                if (currentRow < ROWS - 1) {
+                    currentRow++;
+                    currentCol = 0;
+                    setTimeout(() => highlightCell(currentRow, 0), 500);
+                } else {
+                    isGameOver = true;
+                    showMessage(`Perdu ! Le mot était : ${TARGET}`);
+                    document.getElementById('submit-btn').style.display = 'none';
+                    document.getElementById('restart-btn').style.display = 'inline-block';
+                }
+            }
+        }
+
+        function showMessage(msg) {
+            const m = document.getElementById('message');
+            m.innerText = msg;
+            if (!isGameOver) setTimeout(() => m.innerText = "", 3000);
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculateur d'empreinte carbone pour PC - Défi NIRD 2025">
+    <title>Calculateur CO2 - Nuit de l'Info 2025</title>
+    <style>
+        /* GREEN IT : CSS Minimaliste (< 1KB) */
+        :root {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --accent: #66bb6a; /* Màu xanh lá nhẹ */
+            --card: #1e1e1e;
+            --border: #333;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        main {
+            max-width: 650px;
+            width: 100%;
+        }
+        h1, h2, h3 { color: var(--accent); margin-top: 0; }
+        .card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
+        .val-display { float: right; color: var(--accent); }
+        input[type="range"] { width: 100%; cursor: pointer; margin-bottom: 5px; }
+        
+        /* Grid cho kết quả */
+        .result-box { display: flex; gap: 15px; margin-top: 20px; }
+        .res-card {
+            flex: 1; padding: 15px; border-radius: 6px;
+            border: 1px solid var(--border); text-align: center;
+        }
+        .res-card.win { border-color: #ef5350; } /* Đỏ cho OS nặng */
+        .res-card.linux { border-color: var(--accent); background: rgba(102, 187, 106, 0.05); }
+        
+        .big-num { font-size: 2.2em; font-weight: bold; display: block; margin: 10px 0; }
+        .sup { font-size: 0.6em; vertical-align: super; color: #888; text-decoration: none; }
+        .sup:hover { color: var(--accent); }
+        
+        footer { font-size: 0.85em; color: #888; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 30px; }
+        footer ul { padding-left: 20px; }
+        
+        @media (max-width: 500px) { .result-box { flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+<main>
+    <h1>🌱 Calculateur d'Empreinte Numérique</h1>
+    <p>Estimez l'impact de votre ordinateur et découvrez l'alternative NIRD.</p>
+
+    <!-- FORMULAIRE -->
+    <section class="card">
+        <div style="margin-bottom: 20px;">
+            <label for="watt">
+                Puissance moyenne (Watts) <a href="#ref1" class="sup">[1]</a>
+                <span id="watt-val" class="val-display">65 W</span>
+            </label>
+            <input type="range" id="watt" min="10" max="400" value="65" step="5">
+            <small style="color: #aaa;">Portable ~30-65W | Bureau + Écran ~150-300W</small>
+        </div>
+
+        <div>
+            <label for="hours">
+                Utilisation journalière
+                <span id="hours-val" class="val-display">8 h</span>
+            </label>
+            <input type="range" id="hours" min="1" max="24" value="8" step="1">
+        </div>
+    </section>
+
+    <!-- RÉSULTATS -->
+    <section class="result-box">
+        <!-- Cas Windows/Standard -->
+        <div class="res-card win">
+            <h3>Système Actuel</h3>
+            <p>OS Standard (Lourd)</p>
+            <span class="big-num" id="win-co2">0</span>
+            <span>kg CO₂e / an <a href="#ref2" class="sup">[2]</a></span>
+        </div>
+
+        <!-- Cas Linux/NIRD -->
+        <div class="res-card linux">
+            <h3>Alternative NIRD</h3>
+            <p>GNU/Linux (Léger)</p>
+            <span class="big-num" id="linux-co2">0</span>
+            <span>kg CO₂e / an <a href="#ref3" class="sup">[3]</a></span>
+            <br><br>
+            <small style="color:var(--accent)">-15% d'énergie estimée</small>
+        </div>
+    </section>
+
+    <!-- IMPACT MATÉRIEL (Quan trọng nhất cho NIRD) -->
+    <section class="card" style="margin-top: 20px; border-left: 4px solid var(--accent);">
+        <h3>💡 Le vrai coût est matériel</h3>
+        <p>
+            La consommation électrique n'est que la partie visible. 
+            La fabrication d'un ordinateur émet environ <strong>300 à 400 kg de CO₂e</strong> <a href="#ref4" class="sup">[4]</a>.
+        </p>
+        <p>
+            En installant <strong>Linux</strong> sur un vieux PC incompatible Windows 11, vous prolongez sa vie et évitez cette pollution de fabrication. C'est l'esprit <strong>NIRD</strong>.
+        </p>
+    </section>
+
+    <!-- SOURCES -->
+    <footer>
+        <strong>Sources & Références :</strong>
+        <ul>
+            <li id="ref1">[1] <strong>ADEME (Base Empreinte) :</strong> Puissance moyenne d'un ordinateur portable (30-100W) vs PC fixe (200W+).</li>
+            <li id="ref2">[2] <strong>IEA / Climate Transparency (2023) :</strong> Moyenne mondiale d'intensité carbone de l'électricité (~475g CO₂/kWh). <em>Note: En France, ce chiffre est plus bas, mais l'impact du numérique est mondial.</em></li>
+            <li id="ref3">[3] <strong>GreenIT.fr & Université de l'Illinois :</strong> Les systèmes d'exploitation légers (Linux) réduisent la charge CPU en arrière-plan, économisant l'énergie et la batterie.</li>
+            <li id="ref4">[4] <strong>ADEME (Analyse du cycle de vie) :</strong> 75% à 80% de l'empreinte carbone d'un équipement numérique provient de sa phase de fabrication.</li>
+        </ul>
+    </footer>
+</main>
+
+<script>
+    /* 
+       GREEN IT: Script Vanilla JS optimisé.
+       Pas de librairies externes. 
+       Calcul en temps réel.
+    */
+    
+    // Constantes basées sur les sources
+    const CARBON_INTENSITY = 0.475; // kg CO2 par kWh (Moyenne Monde - Source IEA)
+    const LINUX_EFFICIENCY = 0.85;  // Linux consomme ~15% moins de ressources CPU en idle (Estimation GreenIT)
+
+    const wattInput = document.getElementById('watt');
+    const hoursInput = document.getElementById('hours');
+    
+    function calculate() {
+        // Récupération des valeurs
+        const watts = parseInt(wattInput.value);
+        const hours = parseInt(hoursInput.value);
+
+        // Affichage dynamique
+        document.getElementById('watt-val').innerText = watts + " W";
+        document.getElementById('hours-val').innerText = hours + " h";
+
+        // Calcul kWh par an : (W * h * 365) / 1000
+        const kwhPerYear = (watts * hours * 365) / 1000;
+
+        // Calcul émissions
+        const co2Win = kwhPerYear * CARBON_INTENSITY;
+        const co2Linux = co2Win * LINUX_EFFICIENCY;
+
+        // Mise à jour du DOM
+        document.getElementById('win-co2').innerText = co2Win.toFixed(1);
+        document.getElementById('linux-co2').innerText = co2Linux.toFixed(1);
+    }
+
+    // Écouteurs d'événements passifs (Meilleure perf scroll)
+    wattInput.addEventListener('input', calculate, {passive: true});
+    hoursInput.addEventListener('input', calculate, {passive: true});
+
+    // Initialisation
+    calculate();
+</script>
+
+</body>
+</html>

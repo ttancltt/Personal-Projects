@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apprendre</title>
+<link href="style_apprend.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap" rel="stylesheet">
+
+<style>
+    /* --- CSS CHO CÁC NÚT ĐIỀU HƯỚNG --- */
+    
+    /* Style chung cho cả 2 nút */
+    .btn-nav {
+        position: absolute; /* Cố định vị trí */
+        top: 20px;
+        text-decoration: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 30px; /* Bo tròn */
+        font-family: 'Segoe UI', sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 1000;
+    }
+
+    .btn-nav:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Nút Quay lại (Bên Trái - Màu Tối) */
+    .btn-retour {
+        left: 20px;
+        background-color: #2c3e50; 
+    }
+    .btn-retour:hover {
+        background-color: #34495e;
+    }
+
+    /* Nút Game Mới (Bên Phải - Màu Xanh Lá cho nổi bật) */
+    .btn-next {
+        right: 20px;
+        background-color: #27ae60; 
+    }
+    .btn-next:hover {
+        background-color: #2ecc71;
+    }
+
+    /* Responsive: Trên màn hình điện thoại nhỏ, đẩy header xuống để không bị nút che */
+    header {
+        position: relative; 
+        padding-top: 60px; 
+    }
+    
+    @media (max-width: 600px) {
+        /* Trên điện thoại, cho nút nhỏ lại một chút */
+        .btn-nav {
+            padding: 8px 12px;
+            font-size: 12px;
+            top: 10px;
+        }
+        .btn-retour { left: 10px; }
+        .btn-next { right: 10px; }
+    }
+</style>
+
+</head>
+
+<body>
+
+<!-- 1. NÚT QUAY LẠI WORDLE (GÓC TRÁI) -->
+<a href="wordle.html" class="btn-nav btn-retour">
+    <span>&#8592;</span> Retour au Wordle
+</a>
+
+<!-- 2. NÚT ĐI TỚI GAME KHÁC (GÓC PHẢI) -->
+<!-- Hãy thay đổi 'game_.html' thành tên file game thực tế của bạn -->
+<a href="game_apprendre.html" class="btn-nav btn-next">
+    Jeu Suivant <span>&#8594;</span>
+</a>
+
+<header>
+    <h1>Apprendre</h1>
+    <p>Découvrir et grandir grâce au savoir</p>
+</header>
+
+<section>
+<div class="container">
+
+    <h2>Qu’est-ce que l’apprentissage ?</h2>
+    <div class="definition">
+        Apprendre, c’est <b>acquérir des connaissances, développer des compétences et s’ouvrir à de nouvelles idées</b>.
+        Apprendre, c’est aussi poser des questions, expérimenter et ne pas avoir peur de faire des erreurs.
+    </div>
+    <h1>Complète la phrase – Apprendre le numérique</h1>
+
+
+<p id="affirmation"></p>
+
+    <p id="phrase">Pour apprendre efficacement, il est important de <input type="text" id="reponse" placeholder="..."></p>
+    <button class="btn" onclick="verifier()">Répondre</button>
+    <p id="correction"></p>
+
+</section>
+
+<div id = "button_idee">
+<button onclick="genererIdee()">Générer une idée pour mieux protéger</button>
+</div>
+    <h3 id="idee"></h3>
+
+
+
+<footer>
+© 2025 – Ressource NIRDLE – Réagissez pour l'avenir.
+</footer>
+
+<script>
+const phrases = [
+    { texte: "Pour apprendre une nouvelle langue, il faut ___ régulièrement.", reponse: "pratiquer" },
+    { texte: "Les erreurs sont utiles car elles permettent d' ___ de ses expériences.", reponse: "apprendre" },
+    { texte: "Lire des livres variés aide à ___ ses connaissances.", reponse: "élargir" },
+    { texte: "Poser des questions permet d' ___ des réponses claires.", reponse: "obtenir" },
+    { texte: "Travailler en groupe peut aider à ___ de nouvelles méthodes.", reponse: "découvrir" }
+];
+
+let index = 0;
+
+function afficherPhrase() {
+    document.getElementById("phrase").innerHTML = phrases[index].texte.replace("___", '<input type="text" id="reponse" placeholder="...">');
+    document.getElementById("correction").textContent = "";
+}
+
+function verifier() {
+    const userReponse = document.getElementById("reponse").value.trim().toLowerCase();
+    const bonneReponse = phrases[index].reponse.toLowerCase();
+
+    if (userReponse === bonneReponse) {
+        document.getElementById("correction").textContent = "✔ Bonne réponse !";
+        document.getElementById("correction").style.color = "#3a8f55";
+    } else {
+        document.getElementById("correction").textContent = `✘ Mauvaise réponse. La bonne réponse est : "${phrases[index].reponse}"`;
+        document.getElementById("correction").style.color = "#c0392b";
+    }
+
+    // Passe à la phrase suivante après 1,5 seconde
+    setTimeout(() => {
+        index++;
+        if (index < phrases.length) {
+            afficherPhrase();
+        } else {
+            document.getElementById("phrase").textContent = "🎉 Fin du jeu !";
+            document.getElementById("correction").textContent = "";
+        }
+    }, 1500);
+}
+
+afficherPhrase();
+
+// Lưu ý: Đã comment dòng này lại vì hàm hiển thị affirmation không tồn tại trong script gốc
+// afficherAffirmation(); 
+</script>
+
+<script>
+const idees = [
+    "Faire des petites révisions tous les jours plutôt qu’une seule fois par semaine.",
+    "Créer des fiches ou des cartes mémoire pour retenir l’essentiel.",
+    "Discuter avec d’autres personnes pour comprendre différents points de vue.",
+    "Expérimenter et pratiquer pour transformer la théorie en compétences concrètes.",
+    "Se fixer de petits objectifs d’apprentissage pour rester motivé.",
+    "Apprendre en enseignant à quelqu’un d’autre ce que l’on vient d’étudier."
+];
+
+function genererIdee() {
+    const random = Math.floor(Math.random() * idees.length);
+    document.getElementById("idee").textContent = idees[random];
+}
+</script>
+
+</body>
+</html>

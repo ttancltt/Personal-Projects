@@ -1,0 +1,13 @@
+pages:
+  stage: deploy
+  script:
+    - mkdir public
+    # Copier Images/ et Scripts/ tels quels dans public/
+    - cp -r Images public/
+    - cp -r Scripts public/
+    # Copier le contenu de Sources/ dans la racine de public/
+    - cp -r Sources/* public/
+  artifacts:
+    paths:
+      - public
+  publish: public
