@@ -1,0 +1,3 @@
+if (@ENABLE_TRACE@)
+  find_dependency(FXT REQUIRED)
+endif()

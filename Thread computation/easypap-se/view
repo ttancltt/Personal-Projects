@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+. "${BASH_SOURCE%/*}/script/easypap-common.bash"
+
+error()
+{
+    echo "$@" >&2
+    exec ${EASYVIEW} -h
+}
+
+COMPARE=no
+TRACEFILE=no
+HELP=no
+ARGS=()
+
+for ((i = 1; i <= $#; i++ )); do
+    case ${!i} in
+        -c|--compare)
+            COMPARE=yes
+            continue
+            ;;
+        -d|--dir)
+            if (( i + 1 > $#)); then
+                error "Missing trace directory"
+            fi
+            n=$((i + 1))
+            TRACEDIR="${!n}"
+            ARGS+=("${!i}")
+            ((i++))
+            ;;
+        -p|--params)
+            # use params file if available
+            use_params=yes
+            continue
+            ;;
+        -i|--iteration)
+            if ((i + 1 > $#)); then
+                error "Missing iteration number"
+            fi
+            ARGS+=("${!i}")
+            ((i++))
+            ;;
+        -r|--range)
+            if ((i + 2 > $#)); then
+                error "Missing range parameter"
+            fi
+            ARGS+=("${!i}")
+            ((i++))
+            ARGS+=("${!i}")
+            ((i++))
+            ;;
+        -b|--brightness)
+            if ((i + 1 > $#)); then
+                error "Missing brightness parameter"
+            fi
+            ARGS+=("${!i}")
+            ((i++))
+            ;;
+        -a|--align)
+            ;;
+        -w|--whole-trace)
+            ;;
+        -h|--help)
+            HELP=yes
+            ;;
+        --which)
+            exec ${EASYPAPDIR}/script/which easyview
+            ;;
+        *)
+            TRACEFILE=yes
+            ;;
+    esac
+    ARGS+=("${!i}")
+done
+
+EASYPAP_VERBOSE=yes
+_easyview_find || exit 1
+
+if [[ ${HELP} == "yes" ]]; then
+    exec ${EASYVIEW} -h
+fi
+
+if [[ ${use_params} = yes ]]; then
+    if [[ -f "${TRACEDIR}/params.txt" ]]; then
+        ARGS+=($(< "${TRACEDIR}/params.txt"))
+        exec $0 "${ARGS[@]}"
+    else
+        echo "Warning: Params not found"
+    fi
+fi
+
+if [[ ${COMPARE} == "yes" ]]; then
+    [[ -f "${TRACEDIR}/${CUR_TRACEFILE}" && -f "${TRACEDIR}/${PREV_TRACEFILE}" ]] || error "Comparing trace files requires two files under ${TRACEDIR}"
+    ARGS+=("${TRACEDIR}/${CUR_TRACEFILE}" "${TRACEDIR}/${PREV_TRACEFILE}")
+    TRACEFILE=yes
+fi
+
+if [[ ${TRACEFILE} == "no" ]]; then
+    [[ -f "${TRACEDIR}/${CUR_TRACEFILE}" ]] || error "Trace file not found under ${TRACEDIR}"
+    ARGS+=("${TRACEDIR}/${CUR_TRACEFILE}")
+fi
+
+exec "${EASYVIEW}" "${ARGS[@]}"

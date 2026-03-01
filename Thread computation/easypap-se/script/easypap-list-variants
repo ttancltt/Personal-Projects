@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+. "${BASH_SOURCE%/*}/easypap-utilities.bash"
+
+if [ $# != 1 ]; then
+    echo "Usage: ${0##*/} <kernel>"
+    exit 1
+fi
+
+_easypap_variants "$1" || exit 1
+echo $variants
+
+exit 0

@@ -1,0 +1,10 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include/ezm
+
+Name: ezm
+Description: EasyPAP Monitoring Library
+Version: 1.0.0
+Cflags: -I${includedir}  -DENABLE_TRACE
+Libs: -L${libdir} -lezm

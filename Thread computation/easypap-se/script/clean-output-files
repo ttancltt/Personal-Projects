@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+. "${BASH_SOURCE%/*}/easypap-common.bash"
+
+rm ${TRACEDIR}/*.png ${TRACEDIR}/*.raw ${TRACEDIR}/*.evt 2>/dev/null
+rm ${HASHDIR}/*.sha256 2>/dev/null
+rm ${DUMPDIR}/*.png ${DUMPDIR}/*.raw 2>/dev/null
+rm ${PERFDIR}/*.csv 2>/dev/null
+
+exit 0

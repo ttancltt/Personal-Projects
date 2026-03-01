@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+
+. "${BASH_SOURCE%/*}/easypap-common.bash"
+
+usage()
+{
+    echo "${0##*/}: Manage EasyPAP build directory selection"
+    echo
+    echo "Options:"
+    echo "  -h | --help      : display help"
+    echo "  -l | --list      : list available build directories"
+    echo "  -s | --set <dir> : set the build directory to <dir>"
+    echo "  -c | --current   : display the current build directory"
+    echo "  -u | --unset     : unset the current build directory"
+}
+
+list()
+{
+    local -a builddirs=()
+    local dir
+
+    if ! _easypap_get_build_dir_candidates builddirs dir ; then
+        echo "No build directory found." >&2
+        return 1
+    fi
+
+    for (( d = 0; d < ${#builddirs[@]}; d++ )); do
+        echo -n "$d: ${builddirs[$d]}"
+        if [[ "${builddirs[$d]}" == "$dir" ]]; then
+            echo "     (current)"
+        else
+            echo
+        fi
+    done
+
+    return 0
+}
+
+get_current()
+{
+    local dir
+
+    if ! _easypap_get_build_dir_candidates _ builddir ; then
+        echo "No build directory found." >&2
+        return 1
+    fi
+
+    echo "$builddir"
+    return 0
+}
+
+set_current() # builddir
+{
+    local dir="$1"
+
+    case "$dir" in
+        gcc*|clang*)
+            dir=build-${dir}
+            ;;
+    esac
+
+    dir="${dir%/}"  # Remove trailing slash if any
+    if [[ "${dir##*/}" == "$dir" ]]; then
+        dir="${EASYPAPDIR}/${dir}"
+    fi
+
+    if [[ ! -d "$dir" ]]; then
+        echo "Error: directory '$dir' does not exist." >&2
+        return 1
+    fi
+
+    echo "$dir" > "${EASYPAPDIR}/.easypap-build-dir"
+    return 0
+}
+
+unset()
+{
+    rm -f "${EASYPAPDIR}/.easypap-build-dir"
+    return 0
+}
+
+# main
+if (( $# == 0 )); then
+    # list by default
+    set -- --list
+fi
+
+case $1 in
+    -h|--help)
+        usage 0
+        ;;
+    -l|--list)
+        list
+        ;;
+    -s|--set)
+        if (( $# < 2 )); then
+            echo "Error: option --set must be followed by a directory" >&2
+            usage
+            exit 1
+        fi
+        set_current "$2" && list
+        ;;
+    -c|--current)
+        get_current
+        ;;
+    -u|--unset)
+        unset
+        ;;
+    *)
+        echo "Error: unknown option: $1" >&2
+        usage
+        exit 1
+        ;;
+esac

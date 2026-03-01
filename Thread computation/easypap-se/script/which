@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+. "${BASH_SOURCE%/*}/easypap-common.bash"
+
+usage()
+{
+    echo "${0##*/}: Locate EasyPAP/EasyVIEW program"
+    echo
+    echo "Usage: ${0##*/} [option] [ easypap | easyview ] "
+    echo "Options:"
+    echo "  -h | --help      : display help"
+}
+
+# main
+EASYPAP_VERBOSE=yes
+
+if (( $# == 0 )); then
+    # easypap by default
+    set -- easypap
+fi
+
+case "$1" in
+    -h|--help)
+        usage
+        ;;
+    easypap)
+        _easypap_find || exit 1
+        echo "${EASYPAP}"
+        ;;
+    easyview)
+        _easyview_find || exit 1
+        echo "${EASYVIEW}"
+        ;;
+    *)
+        echo "Error: missing or invalid argument"
+        usage
+        exit 1
+        ;;
+esac
+
+exit 0

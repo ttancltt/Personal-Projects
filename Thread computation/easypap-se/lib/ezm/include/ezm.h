@@ -1,0 +1,89 @@
+#ifndef EZM_H
+#define EZM_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "ezm_footprint.h"
+#include "ezm_perfmeter.h"
+#include "ezm_tracerec.h"
+#include "ezv.h"
+
+struct ezm_recorder_struct;
+typedef struct ezm_recorder_struct *ezm_recorder_t;
+
+#define EZM_NO_DISPLAY 1
+
+#define ezm_init(flags)                                                        \
+  do {                                                                         \
+    __typeof__ (flags) _flags = (flags);                                       \
+    if (!(_flags & EZM_NO_DISPLAY))                                            \
+      ezv_init ();                                                             \
+    _ezm_init (_flags);                                                        \
+  } while (0)
+
+void _ezm_init (unsigned flags);
+
+void ezm_finalize (void);
+
+ezm_recorder_t ezm_recorder_create (unsigned nb_cpus, unsigned nb_gpus);
+void ezm_recorder_delete (ezm_recorder_t rec);
+
+void ezm_set_cpu_palette (ezm_recorder_t rec, ezv_palette_name_t name,
+                          int cyclic_mode);
+
+void ezm_recorder_attach_perfmeter (ezm_recorder_t rec, ezv_ctx_t ctx);
+void ezm_recorder_attach_footprint (ezm_recorder_t rec, ezv_ctx_t ctx);
+void ezm_recorder_attach_tracerec (ezm_recorder_t rec, char *file, char *label);
+
+ezm_perfmeter_t ezm_recorder_get_perfmeter (ezm_recorder_t rec);
+ezm_footprint_t ezm_recorder_get_footprint (ezm_recorder_t rec);
+ezm_tracerec_t ezm_recorder_get_tracerec (ezm_recorder_t rec);
+
+void ezm_recorder_enable (ezm_recorder_t rec, unsigned iter);
+void ezm_recorder_disable (ezm_recorder_t rec);
+int ezm_recorder_is_enabled (ezm_recorder_t rec);
+
+void ezm_start_iteration (ezm_recorder_t rec);
+void ezm_end_iteration (ezm_recorder_t rec);
+
+void ezm_start_task (ezm_recorder_t rec, unsigned cpu);
+
+void ezm_end_task_1D (ezm_recorder_t rec, unsigned cpu, unsigned patch,
+                      unsigned count);
+void ezm_end_task_1D_id (ezm_recorder_t rec, unsigned cpu, unsigned patch,
+                         unsigned count, int task_id);
+void ezm_task_1D (ezm_recorder_t rec, uint64_t start_time, uint64_t end_time,
+                  unsigned cpu, unsigned patch, unsigned count,
+                  task_type_t task_type, int task_id);
+
+void ezm_end_task_2D (ezm_recorder_t rec, unsigned cpu, unsigned x, unsigned y,
+                      unsigned w, unsigned h);
+void ezm_end_task_2D_id (ezm_recorder_t rec, unsigned cpu, unsigned x,
+                         unsigned y, unsigned w, unsigned h, int task_id);
+void ezm_task_2D (ezm_recorder_t rec, uint64_t start_time, uint64_t end_time,
+                  unsigned cpu, unsigned x, unsigned y, unsigned w, unsigned h,
+                  task_type_t task_type, int task_id);
+
+// specific functions
+void ezm_recorder_toggle_heat_mode (ezm_recorder_t rec);
+void ezm_recorder_store_mesh3d_filename (ezm_recorder_t rec,
+                                         const char *filename);
+void ezm_recorder_store_img2d_dim (ezm_recorder_t rec, unsigned width,
+                                   unsigned height);
+void ezm_recorder_store_data_palette (ezm_recorder_t rec,
+                                      ezv_palette_name_t pal);
+void ezm_recorder_declare_task_ids (ezm_recorder_t rec, char *task_ids[]);
+
+// helpers
+void ezm_helper_add_perfmeter (ezm_recorder_t rec, ezv_ctx_t ctx[],
+                               unsigned *nb_ctx);
+void ezm_helper_add_footprint (ezm_recorder_t rec, ezv_ctx_t ctx[],
+                               unsigned *nb_ctx);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

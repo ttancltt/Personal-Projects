@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+. "${BASH_SOURCE%/*}/easypap-utilities.bash"
+
+_easypap_kernels || exit 1
+echo $kernels
+
+exit 0
