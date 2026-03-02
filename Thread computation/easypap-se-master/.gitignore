@@ -1,0 +1,8 @@
+.vscode
+*.pdf
+*.csv
+.DS_Store
+*~
+*build*
+.easypap-build-dir
+*.xlsx

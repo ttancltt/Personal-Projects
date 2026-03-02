@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+. "${BASH_SOURCE%/*}/script/easypap-common.bash"
+
+error()
+{
+    echo -e "$@.\nFor more information, run:\n\t${BASH_SOURCE[0]} --help" >&2
+    exit 1
+}
+
+EASYPAP_VERBOSE=yes
+_easypap_find || exit 1
+
+for ((i = 1; i <= $#; i++ )); do
+    case ${!i} in
+        -t|--trace|-ti|--trace-iter)
+            TRACE=yes
+            ;;
+        -tn|--thumbs)
+            THUMBS=yes
+            ;;
+        -lk|--list-kernels)
+            shift
+            exec ${EASYPAPDIR}/script/easypap-list-kernels "$@"
+            ;;
+        -lv|--list-variants)
+            shift
+            exec ${EASYPAPDIR}/script/easypap-list-variants "$@"
+            ;;
+        -w|--which)
+            exec ${EASYPAPDIR}/script/which easypap
+            ;;
+        -mpi|--mpirun)
+            if ((i == $#)); then
+                error "Error: option --mpi must be followed by a string"
+            fi
+            j=$((i + 1))
+            MPIRUNARGS="${!j}"
+            ;;
+        --gdb|--lldb)
+            DEBUG=${!i#--}
+            ;;
+        *)
+            ;;
+    esac
+done
+
+# if thumbnails generation is requested, clean the old files
+if [[ $THUMBS == "yes" ]]; then
+    rm -f "${TRACEDIR}"/*.png
+fi
+
+# if trace generation is requested, we back up the previous trace file
+if [[ $TRACE = "yes" ]]; then
+    if [[ -f "${TRACEDIR}/${CUR_TRACEFILE}" ]] ; then
+        mv "${TRACEDIR}/${CUR_TRACEFILE}" "${TRACEDIR}/${PREV_TRACEFILE}"
+    fi
+fi
+
+# Run under debugger 
+if [[ $DEBUG = "lldb" ]]; then
+    exec lldb "${EASYPAP}" -- "$@"
+elif [[ $DEBUG = "gdb" ]]; then
+    exec gdb --args "${EASYPAP}" "$@"
+fi
+
+# check if program should be launched by mpirun
+if [[ -n $MPIRUNARGS ]]; then
+    vars=(OMP_NUM_THREADS OMP_SCHEDULE OMP_PLACES OMP_PROC_BIND PTHREAD_POLICY)
+    MPIENV=""
+    if mpirun --version | grep -q 'Open MPI'; then
+        envopt="-x"
+    else
+        envopt="-envlist"
+    fi
+    for v in ${vars[@]}; do
+        if [[ -n ${!v} ]]; then
+            MPIENV="${MPIENV} $envopt $v"
+        fi
+    done
+    mpirun ${MPIENV} ${MPIRUNARGS} "${EASYPAP}" "$@"
+else
+    exec "${EASYPAP}" "$@"
+fi

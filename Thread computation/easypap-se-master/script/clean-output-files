@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+. "${BASH_SOURCE%/*}/easypap-common.bash"
+
+shopt -s nullglob
+
+rm -f ${TRACEDIR}/*.png ${TRACEDIR}/*.raw ${TRACEDIR}/*.evt
+rm -f ${HASHDIR}/*.sha256
+rm -f ${DUMPDIR}/*.png ${DUMPDIR}/*.raw
+rm -f ${PERFDIR}/*.csv
+
+shopt -u nullglob
+
+exit 0
