@@ -1,6 +1,4 @@
-Dưới đây là phần **README.md bằng tiếng Pháp** phù hợp cho mini-projet *Programmation d’un Interprète Shell* (Licence Informatique – Programmation Système).
 
----
 
 # Mini-Projet – Programmation d’un Interprète Shell
 
@@ -121,5 +119,328 @@ Ce projet permet de développer :
 * La programmation concurrente de base
 * L’analyse et l’évaluation d’arbres syntaxiques
 * Une meilleure compréhension du fonctionnement interne d’un shell
+
+---
+
+Voici comment le programme se comporte selon l'exercice
+
+Here is a **clean README section** you can include in your project to describe **all the required functionalities and functions** mentioned in the assignment, with explanations.
+
+You can copy this directly into your `README`.
+
+---
+
+# README – Mini Shell Project
+
+Université de Bordeaux – Programmation Système
+Individual Project
+
+---
+
+# 1. Project Overview
+
+This project consists of implementing a Unix-like mini shell capable of:
+
+* Executing external commands
+* Handling redirections
+* Managing command sequences (`;`, `&&`, `||`)
+* Supporting pipelines (`|`)
+* Running background jobs (`&`)
+* Handling zombie processes using signals
+
+The syntax analysis is already implemented and produces a binary syntax tree (`Expression`).
+Our task was to implement the evaluation logic in `Evaluation.c`.
+
+---
+
+# 2. Core Evaluation Function
+
+## `int evaluateExpr(Expression *e)`
+
+### Purpose
+
+Main recursive evaluation function.
+
+### Role
+
+* Traverses the syntax tree.
+* Executes commands according to the node type (`expr_t`).
+* Returns the exit status of the evaluated expression.
+* Updates the global variable `shellStatus`.
+
+### Behavior by Expression Type
+
+| Expression Type   | Behavior                                    |   |    |
+| ----------------- | ------------------------------------------- | - | -- |
+| `ET_EMPTY`        | Does nothing                                |   |    |
+| `ET_SIMPLE`       | Executes a simple command                   |   |    |
+| `ET_SEQUENCE`     | Executes left then right (`;`)              |   |    |
+| `ET_SEQUENCE_AND` | Executes right only if left succeeds (`&&`) |   |    |
+| `ET_SEQUENCE_OR`  | Executes right only if left fails (`        |   | `) |
+| `ET_PIPE`         | Creates a pipe between commands             |   |    |
+| `ET_REDIRECT`     | Handles redirection                         |   |    |
+| `ET_BG`           | Executes command in background              |   |    |
+
+---
+
+# 3. Execution of Simple Commands
+
+## `int executeSimple(Expression *e)`
+
+### Purpose
+
+Executes a simple external command (e.g., `ls -al`).
+
+### How it works
+
+1. Calls `fork()`
+2. In child:
+
+   * Calls `execvp(e->argv[0], e->argv)`
+3. In parent:
+
+   * Calls `waitpid()` (unless background)
+   * Returns exit status
+
+---
+
+# 4. Redirections
+
+Redirection is handled through:
+
+## `int handleRedirection(Expression *e)`
+
+### Structure Used
+
+```c
+typedef struct RedirectInfo {
+    redirection_t type;
+    int fd;
+    bool toOtherFd;
+    char *fileName;
+} RedirectInfo;
+```
+
+### Supported Redirections
+
+| Redirection | Behavior                            |
+| ----------- | ----------------------------------- |
+| `<`         | Redirect standard input             |
+| `>`         | Redirect standard output            |
+| `>>`        | Append mode                         |
+| `2>`        | Redirect stderr                     |
+| `&>`        | Redirect stdout and stderr          |
+| `<&` / `>&` | Redirect to another file descriptor |
+
+### Functions Used Internally
+
+* `open()`
+* `dup2()`
+* `close()`
+
+### Example
+
+```bash
+ls -al > output.txt
+cat < input.txt
+ls toto 2> errors.txt
+```
+
+---
+
+# 5. Multiple Redirections
+
+Example:
+
+```bash
+cat -n < input.txt > output.txt
+```
+
+The shell:
+
+* Redirects stdin
+* Redirects stdout
+* Then executes command
+
+---
+
+# 6. Pipelines
+
+## `int executePipe(Expression *e)`
+
+### Purpose
+
+Handles:
+
+```bash
+ls -al | cat -n
+```
+
+### How it works
+
+1. Create pipe with `pipe()`
+2. Fork left child:
+
+   * Redirect stdout to pipe write end
+3. Fork right child:
+
+   * Redirect stdin to pipe read end
+4. Close pipe in parent
+5. Wait for both children
+
+### Multiple Pipelines
+
+Supports:
+
+```bash
+cmd1 | cmd2 | cmd3
+```
+
+By recursively applying pipe logic.
+
+---
+
+# 7. Command Sequences
+
+## `ET_SEQUENCE ( ; )`
+
+```bash
+ls ; pwd
+```
+
+* Executes left
+* Then executes right
+* Always executes both
+
+---
+
+## `ET_SEQUENCE_AND ( && )`
+
+```bash
+make && ./program
+```
+
+* Executes right only if left returns `0`
+
+---
+
+## `ET_SEQUENCE_OR ( || )`
+
+```bash
+make || echo "Compilation failed"
+```
+
+* Executes right only if left fails
+
+---
+
+# 8. Background Execution
+
+## `int executeBackground(Expression *e)`
+
+Example:
+
+```bash
+xeyes &
+```
+
+### Behavior
+
+* Forks process
+* Child executes command
+* Parent does NOT wait
+* Immediately returns control to shell
+
+---
+
+# 9. Zombie Process Handling
+
+To avoid zombie processes:
+
+## Signal Handler
+
+```c
+void sigchld_handler(int sig)
+```
+
+### Purpose
+
+* Handles `SIGCHLD`
+* Calls:
+
+```c
+while (waitpid(-1, NULL, WNOHANG) > 0);
+```
+
+This cleans up terminated background processes.
+
+---
+
+# 10. Important System Calls Used
+
+| Function                   | Purpose                                     |
+| -------------------------- | ------------------------------------------- |
+| `fork()`                   | Create new process                          |
+| `execvp()`                 | Execute program                             |
+| `waitpid()`                | Wait for child                              |
+| `pipe()`                   | Create communication channel                |
+| `dup2()`                   | Redirect file descriptors                   |
+| `open()`                   | Open files                                  |
+| `close()`                  | Close file descriptors                      |
+| `signal()` / `sigaction()` | Handle signals                              |
+| `setpgid()`                | Manage process groups (for background jobs) |
+
+---
+
+# 11. Bonus Features (Optional)
+
+Possible improvements:
+
+* `2>&1` descriptor redirection
+* Built-in commands (`cd`, `echo`, `source`)
+* Environment variables
+* Job control
+* Terminal management
+
+---
+
+# 12. Global Variables
+
+## `int shellStatus`
+
+Stores exit status of last command.
+
+## `Shell shell`
+
+Contains:
+
+* Parsed expression tree
+* Command-line arguments
+* Configuration flags
+
+---
+
+# 13. Execution Flow Summary
+
+1. Read command (readline)
+2. Parse → generate `Expression` tree
+3. Call `evaluateExpr()`
+4. Execute recursively
+5. Update `shellStatus`
+6. Display new prompt
+
+---
+
+# 14. Example Supported Commands
+
+```bash
+ls -al
+ls -al > output.txt
+cat < input.txt
+ls | grep .c
+make && ./program
+sleep 5 &
+ls 2>&1 > all.txt
+```
 
 ---

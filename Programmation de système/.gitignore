@@ -1,0 +1,16 @@
+# Object files
+*.o
+
+# Executable
+Shell
+
+# Flex generated
+lex.yy.c
+
+# Bison generated
+y.tab.c
+y.tab.h
+y.output
+
+# Backup files
+*~

@@ -1,9 +1,9 @@
-Terminals unused in grammar
+Terminaux inutilisés dans la grammaire
 
     ERROR
 
 
-Grammar
+Grammaire
 
     0 $accept: commandLine $end
 
@@ -26,7 +26,7 @@ Grammar
    14        | command SINGLE_ARG
 
 
-Terminals, with rules where they appear
+Terminaux, suivis des règles où ils apparaissent
 
     $end (0) 0
     '\n' (10) 1 2
@@ -43,77 +43,77 @@ Terminals, with rules where they appear
     SINGLE_ARG <singleArg> (262) 10 13 14
 
 
-Nonterminals, with rules where they appear
+Non-terminaux, suivis des règles où ils apparaissent
 
     $accept (14)
-        on left: 0
+        à gauche: 0
     commandLine (15)
-        on left: 1 2
-        on right: 0
+        à gauche: 1 2
+        à droite: 0
     expressionOrNothing <expr> (16)
-        on left: 3 4
-        on right: 1 2 12
+        à gauche: 3 4
+        à droite: 1 2 12
     expression <expr> (17)
-        on left: 5 6 7 8 9 10 11 12
-        on right: 4 6 7 8 9 10 11
+        à gauche: 5 6 7 8 9 10 11 12
+        à droite: 4 6 7 8 9 10 11
     command <argsList> (18)
-        on left: 13 14
-        on right: 5 14
+        à gauche: 13 14
+        à droite: 5 14
 
 
-State 0
+État 0
 
     0 $accept: • commandLine $end
 
-    SINGLE_ARG  shift, and go to state 1
-    '('         shift, and go to state 2
+    SINGLE_ARG  décalage et aller à l'état 1
+    '('         décalage et aller à l'état 2
 
-    $default  reduce using rule 3 (expressionOrNothing)
+    $défaut  réduction par utilisation de la règle 3 (expressionOrNothing)
 
-    commandLine          go to state 3
-    expressionOrNothing  go to state 4
-    expression           go to state 5
-    command              go to state 6
+    commandLine          aller à l'état 3
+    expressionOrNothing  aller à l'état 4
+    expression           aller à l'état 5
+    command              aller à l'état 6
 
 
-State 1
+État 1
 
    13 command: SINGLE_ARG •
 
-    $default  reduce using rule 13 (command)
+    $défaut  réduction par utilisation de la règle 13 (command)
 
 
-State 2
+État 2
 
    12 expression: '(' • expressionOrNothing ')'
 
-    SINGLE_ARG  shift, and go to state 1
-    '('         shift, and go to state 2
+    SINGLE_ARG  décalage et aller à l'état 1
+    '('         décalage et aller à l'état 2
 
-    $default  reduce using rule 3 (expressionOrNothing)
+    $défaut  réduction par utilisation de la règle 3 (expressionOrNothing)
 
-    expressionOrNothing  go to state 7
-    expression           go to state 5
-    command              go to state 6
+    expressionOrNothing  aller à l'état 7
+    expression           aller à l'état 5
+    command              aller à l'état 6
 
 
-State 3
+État 3
 
     0 $accept: commandLine • $end
 
-    $end  shift, and go to state 8
+    $end  décalage et aller à l'état 8
 
 
-State 4
+État 4
 
     1 commandLine: expressionOrNothing • '\n'
     2            | expressionOrNothing • error '\n'
 
-    error  shift, and go to state 9
-    '\n'   shift, and go to state 10
+    error  décalage et aller à l'état 9
+    '\n'   décalage et aller à l'état 10
 
 
-State 5
+État 5
 
     4 expressionOrNothing: expression •
     6 expression: expression • ';' expression
@@ -123,134 +123,134 @@ State 5
    10           | expression • REDIR SINGLE_ARG
    11           | expression • '&'
 
-    ';'    shift, and go to state 11
-    '&'    shift, and go to state 12
-    AND    shift, and go to state 13
-    OR     shift, and go to state 14
-    '|'    shift, and go to state 15
-    REDIR  shift, and go to state 16
+    ';'    décalage et aller à l'état 11
+    '&'    décalage et aller à l'état 12
+    AND    décalage et aller à l'état 13
+    OR     décalage et aller à l'état 14
+    '|'    décalage et aller à l'état 15
+    REDIR  décalage et aller à l'état 16
 
-    $default  reduce using rule 4 (expressionOrNothing)
+    $défaut  réduction par utilisation de la règle 4 (expressionOrNothing)
 
 
-State 6
+État 6
 
     5 expression: command •
    14 command: command • SINGLE_ARG
 
-    SINGLE_ARG  shift, and go to state 17
+    SINGLE_ARG  décalage et aller à l'état 17
 
-    $default  reduce using rule 5 (expression)
+    $défaut  réduction par utilisation de la règle 5 (expression)
 
 
-State 7
+État 7
 
    12 expression: '(' expressionOrNothing • ')'
 
-    ')'  shift, and go to state 18
+    ')'  décalage et aller à l'état 18
 
 
-State 8
+État 8
 
     0 $accept: commandLine $end •
 
-    $default  accept
+    $défaut  accepter
 
 
-State 9
+État 9
 
     2 commandLine: expressionOrNothing error • '\n'
 
-    '\n'  shift, and go to state 19
+    '\n'  décalage et aller à l'état 19
 
 
-State 10
+État 10
 
     1 commandLine: expressionOrNothing '\n' •
 
-    $default  reduce using rule 1 (commandLine)
+    $défaut  réduction par utilisation de la règle 1 (commandLine)
 
 
-State 11
+État 11
 
     6 expression: expression ';' • expression
 
-    SINGLE_ARG  shift, and go to state 1
-    '('         shift, and go to state 2
+    SINGLE_ARG  décalage et aller à l'état 1
+    '('         décalage et aller à l'état 2
 
-    expression  go to state 20
-    command     go to state 6
+    expression  aller à l'état 20
+    command     aller à l'état 6
 
 
-State 12
+État 12
 
    11 expression: expression '&' •
 
-    $default  reduce using rule 11 (expression)
+    $défaut  réduction par utilisation de la règle 11 (expression)
 
 
-State 13
+État 13
 
     7 expression: expression AND • expression
 
-    SINGLE_ARG  shift, and go to state 1
-    '('         shift, and go to state 2
+    SINGLE_ARG  décalage et aller à l'état 1
+    '('         décalage et aller à l'état 2
 
-    expression  go to state 21
-    command     go to state 6
+    expression  aller à l'état 21
+    command     aller à l'état 6
 
 
-State 14
+État 14
 
     8 expression: expression OR • expression
 
-    SINGLE_ARG  shift, and go to state 1
-    '('         shift, and go to state 2
+    SINGLE_ARG  décalage et aller à l'état 1
+    '('         décalage et aller à l'état 2
 
-    expression  go to state 22
-    command     go to state 6
+    expression  aller à l'état 22
+    command     aller à l'état 6
 
 
-State 15
+État 15
 
     9 expression: expression '|' • expression
 
-    SINGLE_ARG  shift, and go to state 1
-    '('         shift, and go to state 2
+    SINGLE_ARG  décalage et aller à l'état 1
+    '('         décalage et aller à l'état 2
 
-    expression  go to state 23
-    command     go to state 6
+    expression  aller à l'état 23
+    command     aller à l'état 6
 
 
-State 16
+État 16
 
    10 expression: expression REDIR • SINGLE_ARG
 
-    SINGLE_ARG  shift, and go to state 24
+    SINGLE_ARG  décalage et aller à l'état 24
 
 
-State 17
+État 17
 
    14 command: command SINGLE_ARG •
 
-    $default  reduce using rule 14 (command)
+    $défaut  réduction par utilisation de la règle 14 (command)
 
 
-State 18
+État 18
 
    12 expression: '(' expressionOrNothing ')' •
 
-    $default  reduce using rule 12 (expression)
+    $défaut  réduction par utilisation de la règle 12 (expression)
 
 
-State 19
+État 19
 
     2 commandLine: expressionOrNothing error '\n' •
 
-    $default  reduce using rule 2 (commandLine)
+    $défaut  réduction par utilisation de la règle 2 (commandLine)
 
 
-State 20
+État 20
 
     6 expression: expression • ';' expression
     6           | expression ';' expression •
@@ -260,16 +260,16 @@ State 20
    10           | expression • REDIR SINGLE_ARG
    11           | expression • '&'
 
-    '&'    shift, and go to state 12
-    AND    shift, and go to state 13
-    OR     shift, and go to state 14
-    '|'    shift, and go to state 15
-    REDIR  shift, and go to state 16
+    '&'    décalage et aller à l'état 12
+    AND    décalage et aller à l'état 13
+    OR     décalage et aller à l'état 14
+    '|'    décalage et aller à l'état 15
+    REDIR  décalage et aller à l'état 16
 
-    $default  reduce using rule 6 (expression)
+    $défaut  réduction par utilisation de la règle 6 (expression)
 
 
-State 21
+État 21
 
     6 expression: expression • ';' expression
     7           | expression • AND expression
@@ -279,13 +279,13 @@ State 21
    10           | expression • REDIR SINGLE_ARG
    11           | expression • '&'
 
-    '|'    shift, and go to state 15
-    REDIR  shift, and go to state 16
+    '|'    décalage et aller à l'état 15
+    REDIR  décalage et aller à l'état 16
 
-    $default  reduce using rule 7 (expression)
+    $défaut  réduction par utilisation de la règle 7 (expression)
 
 
-State 22
+État 22
 
     6 expression: expression • ';' expression
     7           | expression • AND expression
@@ -295,13 +295,13 @@ State 22
    10           | expression • REDIR SINGLE_ARG
    11           | expression • '&'
 
-    '|'    shift, and go to state 15
-    REDIR  shift, and go to state 16
+    '|'    décalage et aller à l'état 15
+    REDIR  décalage et aller à l'état 16
 
-    $default  reduce using rule 8 (expression)
+    $défaut  réduction par utilisation de la règle 8 (expression)
 
 
-State 23
+État 23
 
     6 expression: expression • ';' expression
     7           | expression • AND expression
@@ -311,13 +311,13 @@ State 23
    10           | expression • REDIR SINGLE_ARG
    11           | expression • '&'
 
-    REDIR  shift, and go to state 16
+    REDIR  décalage et aller à l'état 16
 
-    $default  reduce using rule 9 (expression)
+    $défaut  réduction par utilisation de la règle 9 (expression)
 
 
-State 24
+État 24
 
    10 expression: expression REDIR SINGLE_ARG •
 
-    $default  reduce using rule 10 (expression)
+    $défaut  réduction par utilisation de la règle 10 (expression)
