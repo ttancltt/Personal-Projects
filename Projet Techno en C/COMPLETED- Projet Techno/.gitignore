@@ -1,0 +1,13 @@
+# Emscripten
+emsdk/
+
+# Build files
+build/
+*.o
+*.a
+*.wasm
+*.js
+*.html
+
+# Temporary
+*.log

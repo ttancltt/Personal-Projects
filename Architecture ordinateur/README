@@ -1,0 +1,127 @@
+
+# Mini-projet – Étude et modification du processeur Y86 (HCL)
+
+## 📚 Objectif pédagogique
+
+Ce mini-projet s’inscrit dans le cadre du module d’**Architecture des Ordinateurs** (Licence STS – Université de Bordeaux).
+
+L’objectif principal est de **comprendre, analyser et modifier le code HCL** (Hardware Control Language) du processeur séquentiel Y86 afin de :
+
+* Factoriser certaines instructions existantes
+* Libérer des opcodes
+* Ajouter de nouvelles instructions au jeu d’instructions
+* Vérifier le bon fonctionnement du processeur modifié
+* Tester la robustesse des modifications à l’aide de programmes assembleur
+
+Ce travail permet d’approfondir la compréhension :
+
+* du fonctionnement interne d’un processeur
+* des différentes étapes du pipeline séquentiel (fetch, decode, execute, memory, write-back, PC update)
+* du rôle des signaux de contrôle en HCL
+
+---
+
+## 🧠 Contenu du projet
+
+Le projet est divisé en plusieurs parties indépendantes :
+
+### 1️⃣ Factorisation des instructions `rrmovl` et `irmovl`
+
+* Regroupement sous un même `icode`
+* Utilisation du champ `ifun` pour distinguer :
+
+  * déplacement registre → registre
+  * déplacement immédiat → registre
+* Modification du code HCL pour adapter les signaux de contrôle
+
+Objectif : optimiser l’utilisation des opcodes disponibles.
+
+---
+
+### 2️⃣ Ajout des instructions `incl` et `decl`
+
+Implémentation de nouvelles instructions inspirées de l’architecture x86 :
+
+* `incl %reg` (équivalent à `iaddl 1, %reg`)
+* `decl %reg` (équivalent à `isubl 1, %reg`)
+
+Travail réalisé :
+
+* Modification du jeu d’instructions
+* Adaptation du code HCL
+* Mise à jour des signaux
+* Vérification des codes de condition (Z, S, O)
+
+Objectif : améliorer la compacité du code assembleur.
+
+---
+
+### 3️⃣ Ajout des instructions `loop`, `loope`, `loopne`
+
+Implémentation d’instructions de boucle inspirées du processeur x86 :
+
+* `loop label`
+* `loope label`
+* `loopne label`
+
+Travail effectué :
+
+* Ajout d’un nouvel `icode`
+* Gestion du registre `ecx`
+* Adaptation du signal de branchement
+* Intégration avec la logique existante de `JXX`
+* Respect des contraintes sur les codes de condition
+
+Objectif : comprendre la gestion des branchements conditionnels au niveau matériel.
+
+---
+
+## 🛠️ Technologies utilisées
+
+* Simulateur Y86 (version séquentielle)
+* HCL (Hardware Control Language)
+* Assembleur Y86
+* Outils de test fournis avec le simulateur
+
+---
+
+## 🧪 Méthodologie
+
+Pour chaque modification :
+
+1. Modification du jeu d’instructions
+2. Adaptation du code HCL
+3. Compilation
+4. Tests avec programmes assembleur dédiés
+5. Vérification détaillée des signaux à chaque étape du processeur
+
+Une attention particulière a été portée à :
+
+* la cohérence des signaux
+* la robustesse des tests
+* la factorisation du code
+* la minimisation des modifications inutiles
+
+---
+
+## 🎯 Compétences développées
+
+Ce projet permet de développer :
+
+* Une compréhension approfondie de l’architecture d’un processeur
+* La lecture et modification de code matériel abstrait (HCL)
+* L’analyse des signaux de contrôle
+* La conception et validation d’extensions d’un ISA
+* La capacité à tester rigoureusement un système bas niveau
+
+---
+
+## 👥 Travail en binôme
+
+Projet réalisé en binôme dans le cadre du TP n°12.
+
+Les noms des étudiants figurent dans le rapport PDF fourni avec ce dépôt.
+
+---
+
+

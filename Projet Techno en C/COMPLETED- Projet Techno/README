@@ -21,6 +21,12 @@ These are some instructions to compile and run the game:
     2. "make all" to compile
     3. "make serve" to be able to access the game at http://localhost:8001/game.html
     After "make all" the folder structure should look like this
+To compile the game, you need to have Emscripten installed on your machine. You can follow the instructions below to set it up:
+    1. "git clone https://github.com/emscripten-core/emsdk.git"
+    2. "cd emsdk"
+    3. "./emsdk install latest"
+    4. "./emsdk activate latest"
+    5. "source ./emsdk_env.sh"
 
 /make-game-web 
   ├── res/

@@ -1,1 +1,125 @@
-This project demands students to replicate the function of a shell that is on UNIX operating system
+Dưới đây là phần **README.md bằng tiếng Pháp** phù hợp cho mini-projet *Programmation d’un Interprète Shell* (Licence Informatique – Programmation Système).
+
+---
+
+# Mini-Projet – Programmation d’un Interprète Shell
+
+## 📚 Contexte pédagogique
+
+Ce mini-projet a été réalisé dans le cadre du module de **Programmation Système** (Licence Informatique – Université de Bordeaux).
+
+L’objectif du projet est de comprendre et mettre en œuvre les mécanismes fondamentaux d’un système Unix à travers l’implémentation d’un **interpréteur de commandes (mini-shell)** en langage C.
+
+Le travail consiste à compléter un embryon de shell fourni, capable d’analyser syntaxiquement une ligne de commande et de produire un arbre syntaxique, afin d’en assurer l’exécution effective.
+
+---
+
+## 🎯 Objectifs du projet
+
+L’objectif principal est d’implémenter, dans le fichier `Evaluation.c`, l’évaluation et l’exécution des commandes décrites par l’arbre syntaxique généré.
+
+Le projet permet de travailler sur :
+
+* La création de processus (`fork`)
+* L’exécution de programmes (`exec`)
+* La synchronisation avec les processus fils (`wait`, `waitpid`)
+* Les redirections d’entrées/sorties (`dup2`, descripteurs de fichiers)
+* Les tubes (`pipe`)
+* La gestion des signaux (notamment `SIGCHLD`)
+* La gestion des tâches en arrière-plan
+
+---
+
+## 🛠 Fonctionnalités implémentées
+
+### 1️⃣ Exécution des commandes simples
+
+* Exécution de commandes externes (ex : `ls -al`)
+* Gestion des arguments (`argv`)
+* Mise à jour du code de retour (`exit status`)
+
+---
+
+### 2️⃣ Redirections
+
+Implémentation des redirections suivantes :
+
+* Redirection de l’entrée standard : `<`
+* Redirection de la sortie standard : `>`
+* Redirection en mode ajout : `>>`
+* Redirection de la sortie d’erreur : `2>`
+* Redirection combinée : `&>`
+* Redirections multiples dans une même commande
+
+---
+
+### 3️⃣ Enchaînement de commandes
+
+Support des opérateurs :
+
+* Séquence simple : `;`
+* Séquence conditionnelle AND : `&&`
+* Séquence conditionnelle OR : `||`
+
+---
+
+### 4️⃣ Pipelines
+
+* Pipelines de deux commandes : `cmd1 | cmd2`
+* Pipelines multiples : `cmd1 | cmd2 | cmd3`
+* Gestion correcte des descripteurs de fichiers
+* Fermeture appropriée des extrémités inutilisées des pipes
+
+---
+
+### 5️⃣ Exécution en arrière-plan
+
+* Support de l’opérateur `&`
+* Non-blocage du shell lors de l’exécution
+* Gestion des processus zombies via le traitement du signal `SIGCHLD`
+
+---
+
+## 🧠 Architecture du programme
+
+Le shell repose sur :
+
+* Une analyse syntaxique produisant un **arbre binaire d’expressions**
+* Une évaluation récursive de cet arbre
+* Une gestion explicite des processus et des descripteurs
+
+Chaque nœud de l’arbre correspond à un type d’expression :
+
+* Commande simple
+* Séquence
+* Pipeline
+* Redirection
+* Tâche en arrière-plan
+
+---
+
+## 🧪 Tests réalisés
+
+Des tests ont été effectués pour vérifier :
+
+* L’exécution correcte des commandes simples
+* Le bon fonctionnement des redirections
+* La propagation correcte des codes de retour
+* Le comportement attendu des opérateurs conditionnels
+* L’absence de processus zombies
+* Le bon fonctionnement des pipelines complexes
+
+---
+
+## 🎓 Compétences développées
+
+Ce projet permet de développer :
+
+* Une compréhension approfondie du modèle processus sous Unix
+* La manipulation des descripteurs de fichiers
+* La gestion des signaux
+* La programmation concurrente de base
+* L’analyse et l’évaluation d’arbres syntaxiques
+* Une meilleure compréhension du fonctionnement interne d’un shell
+
+---
