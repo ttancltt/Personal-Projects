@@ -4,7 +4,7 @@
 //#include "tsp_prog_dyn.h"
 //#include "tsp_heuristic.h"
  #include "tsp_mst.h"
-// #include "pppp.h"
+ #include "pppp.h"
 
 int main(int argc, char *argv[]) {
   int n         = (argc >= 2) ? atoi(argv[1]) : 10;
@@ -183,8 +183,8 @@ int main(int argc, char *argv[]) {
                                           // pour sortir)
     if (new_redraw3) {                    // recalcule si nécessaire
       bzero(M.deg, M.n * sizeof(*M.deg)); // vide le graphe
-      PPPP(naive);
-      PPPP(divide);
+      //PPPP(naive);
+      //PPPP(divide);
       PPPP(random);
       printf("\n");
     }

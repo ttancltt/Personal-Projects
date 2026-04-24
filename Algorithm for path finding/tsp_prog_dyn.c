@@ -10,7 +10,12 @@
 //
 
 // Renvoie l'ensemble S\{i}.
-int DeleteSet(int S, int i) { return S & ~(1 << i); }
+// Par exemple, si S=0b1011 (ensemble {0, 1, 3}) et i=1, alors DeleteSet(S, i) renvoie 0b1001 (ensemble {0, 3}).
+//bitmask là pour représenter les ensembles de points, 
+//avec le bit i à 1 si le point i est dans l'ensemble, et à 0 sinon. 
+//Par exemple, si S=0b1011 (ensemble {0, 1, 3}) et i=1, alors DeleteSet(S, i) renvoie 0b1001 (ensemble {0, 3}).
+int DeleteSet(int S, int i) { return S & ~(1 << i); } 
+
 
 int ExtractPath(cell **D, int t, int S, int n, int *Q) {
   /*
@@ -89,12 +94,14 @@ double tsp_prog_dyn(point *V, int n, int *Q) {
   // Elle comporte (n-1)*2^(n-1) "cell". NB: la colonne S=0
   // (l'ensemble vide) n'est pas utilisée.
 
-  int const L = n-1;    // L = nombre de lignes = indice du dernier point
+  int const L = n-1;    // L = nombre de lignes = indice du dernier point  // vd n=5 thì L=4, C =16
   int const C = 1 << L; // C = nombre de colonnes
 
   cell **D = malloc(L*sizeof(cell*)); // L=n-1 lignes
   for (int t=0; t<L; t++) D[t] = malloc(C*sizeof(cell)); // C=2^{n-1} colonnes
-  D[0][1].length=-1; // pour savoir si la table a été remplie
+  D[0][1].length=-1; // pour savoir si la table a été remplie. Why? Parce que D[0][1] correspond à l'ensemble S={0} et au point t=0, 
+                     //et si D[0][1].length est négatif, cela signifie que la table n'a pas été correctement remplie, 
+                     //car dans une table correctement remplie, D[0][1].length devrait être égal à la distance entre V[n-1] et V[0].
 
 
   //-------------------------------------------------------------
@@ -115,13 +122,15 @@ double tsp_prog_dyn(point *V, int n, int *Q) {
 
     for (int t = 0; t < L; t++) {
       // On ne calcule D[t][S] que si le point t appartient à l'ensemble S
-      if (!(S & (1 << t))) continue;
+      if (!(S & (1 << t))) continue; // t doit être dans S pour calculer D[t][S] ou D[L][C]
 
       int T = DeleteSet(S, t); // T = S \ {t}
+      //we want to compute T= S\{t} for the current S and t. The function DeleteSet(S, t) takes the bitmask S representing the set of points and the index t of the point to remove, and returns a new bitmask T that represents the set S without the point t.
 // Si T == S si oui -> continue
 
       if (T == 0) {
         // Cas de base : S = {t}, on vient directement du point n-1
+        //S= {t} means that the set S contains only the point t. In this case, the length of the path from V[n-1] to V[t] that visits all points in S (which is just V[t]) is simply the distance from V[n-1] to V[t].
         D[t][S].length = dist(V[n - 1], V[t]);
         D[t][S].pred = n - 1;
       } else {
@@ -130,8 +139,8 @@ double tsp_prog_dyn(point *V, int n, int *Q) {
         int best_x = -1;
 
         for (int x = 0; x < L; x++) {
-          // x doit être dans T
-          if ((T & (1 << x)) && D[x][T].length >= 0) {
+          // x doit être dans T alors (T & (1 << x)) doit être vrai, et D[x][T].length doit être défini (>=0) pour que ce soit un candidat valide
+          if ((T & (1 << x)) && D[x][T].length >= 0) { //x là cột hay hàng ? x là cột, T là hàng
             double d = D[x][T].length + dist(V[x], V[t]);
             if (d < min_dist) {
               min_dist = d;

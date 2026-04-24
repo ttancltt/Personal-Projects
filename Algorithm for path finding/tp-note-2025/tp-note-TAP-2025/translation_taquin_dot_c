@@ -1,0 +1,466 @@
+// Traduction des commentaires de taquin.c. Ne pas modifier.
+
+// Translation of comments from taquin.c. Do not modify.
+
+/*
+
+INSTRUCTIONS:
+
+- Start by reading the subject (.pdf)! Simply compile with make.
+
+- This is an individual test. Any communication with others is
+  prohibited. AI and programming assistants are forbidden.
+  Outgoing connections from UB and incoming connections to your account
+  from outside are prohibited (they are recorded and will be checked after the
+test).
+
+- Moodle page for retrieving sources and submitting the taquin.c file:
+
+     https://moodle.u-bordeaux.fr/course/view.php?id=6930#section-1
+
+- Do not change the order of functions in taquin.c. Do not modify misc.h.
+
+- Read the config type in misc.h. It refers to a pointer to a structure.
+
+- Complete/code the incomplete functions, namely:
+
+  - config copy_config(config C)
+  - void set_zero(config C)
+  - config move(config C, char m)
+  - void random_permutation(int *P, int k)
+  - int fcmp_config(const void *X, const void *Y)
+  - int h1(config X)
+  - int h2(config X)
+  - int h3(config X) [EN BONUS]
+  - config solve(config S, heuristic h)
+
+  A description of each function is provided before its skeleton (which you must
+  complete). Some functions are provided. You don't need to read them, except
+  possibly for new_config() (which is the only function provided in this file;
+  the others are described in misc.h).
+
+  - You can modify the main() function for your own tests.
+
+  - Before submitting on the Moodle page, make sure that:
+
+  - The debugging instructions (printf for example) in your functions have been
+  removed or commented out.
+
+  - Your code compiles, even if it doesn't work normally, without errors and
+  with as few warnings as possible.
+
+  TIPS:
+
+  - Test each function STEP BY STEP, progressively, without waiting until the
+  last minute to compile.
+
+  - To simplify, you are not required to free the allocated memory.
+  Your code may have memory leaks (this is the case for the code
+  provided to you).
+
+*/
+
+#include "misc.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+// Creates an n x n configuration where all the cells are zero. All fields
+// are initialized. It will be assumed that n > 0 (so it is not the function's
+// responsibility to handle this condition, but for the caller to ensure it).
+//
+// [YOU DO NOT NEED TO CODE THIS FUNCTION]
+//
+config new_config(int n) {
+    config R = malloc(sizeof(*R));
+    R->n     = n;
+    R->G     = malloc(n * sizeof(*(R->G)));
+    for (int i = 0; i < n; i++)
+        R->G[i] = calloc(n, sizeof(int));
+    R->i0 = R->j0 = 0;
+    R->cost       = 0;
+    R->score      = -1; // pour affichage intelligent avec print_config()
+    R->parent     = NULL;
+    return R;
+}
+
+// Creates a copy of the configuration C, assumed to be non-NULL. You can
+// use the new_config function above. Make sure to copy all the fields.
+//
+// Note: in the copy C_copy, it is not enough to assign C->G to
+// C_copy->G because we want to copy the cells of the array.
+//
+// [COMPLETE THIS FUNCTION]
+//
+config copy_config(config C) {
+    ;
+    ;
+    ;
+    return NULL;
+}
+
+// Finds the coordinates i,j of the cell C->G[i][j] that equals 0,
+// and assigns i to C->i0 and j to C->j0. It is assumed that C is non-NULL,
+// and that C->G contains a single 0 value.
+//
+// [COMPLETE THIS FUNCTION]
+//
+void set_zero(config C) {
+    ;
+    ;
+    ;
+    return;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// In the following, we refer to the "neighbor" of a configuration.       //
+//                                                                        //
+// We work in the following graph (on which we will apply A* in solve()): //
+// - The vertices are the configurations.                                 //
+// - There is an edge C->C' if we can go from C to C' by a move.          //
+// In this case, we say that C' is a neighboring configuration of C.      //
+////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+
+//
+//
+//
+// Returns the neighboring configuration of C where the move m has been made.
+// If the move is not possible, the function returns NULL. In all cases, C
+// is not modified (a new configuration is returned).
+//
+// It is assumed that C is non-NULL and m is one of the 4 characters in "hbgd".
+//
+// Recall that a move m means, by convention, that we move a neighboring cell
+// of the empty cell TOWARDS the empty cell. For example, 'h' means we move
+// one cell up (if possible), which will have the effect of moving the point
+// (i0,j0) one row down.
+//
+// You may use copy_config() and SWAP(). You must correctly update (i0,j0),
+// in addition to modifying cells in C->G.
+//
+// [COMPLETE THIS FUNCTION]
+//
+config move(config C, char m) {
+    ;
+    ;
+    ;
+    return NULL;
+}
+
+// Function that quickly generates a random permutation P of
+// {0,1,...,k-1}. This function is used by the create_random() function
+// already written for you, which generates a random configuration.
+//
+// The random_permutation() function to write assumes that P points to k cells
+// of type int, already allocated: P[0],...,P[k-1]. It consists of:
+//
+// 1. Initialize P with the identity permutation (P[i] = i for all i in
+// {0,1,...,k-1}).
+//
+// 2. For each position i of P, starting from the last (k-1) down to
+// i = 1 (there’s nothing to do for i=0), you must:
+//
+// 2.1 Choose a random index j in {0,1,...,i};
+// 2.2 Swap P[j] with P[i].
+//
+// To generate a random integer, use the random() function. You will then
+// need to use a modulo to restrict the target value range.
+//
+// [COMPLETE THIS FUNCTION]
+//
+void random_permutation(int *P, int k) {
+    // Create here the random permutation of P on k cells
+    ;
+    ;
+    ;
+}
+
+// Comparison function for two configurations assumed to be non-NULL based on
+// their score field (the score values will be calculated later in A*).
+//
+// The fcmp_config function should return:
+//
+// * -1 if the score of the configuration pointed to by X is < than that of the
+// configuration pointed to by Y,
+// * 1 if the score of the configuration pointed to by X is > than that of the
+// configuration pointed to by Y,
+// * 0 if the scores of the two configurations are equal,
+//
+// [COMPLETE THIS FUNCTION]
+//
+int fcmp_config(const void *X, const void *Y) {
+    ;
+    ;
+    return 0;
+}
+
+typedef int (*heuristic)(config);
+
+// Heuristic giving the number of misplaced tiles, not counting the empty tile.
+// Of course, this number is zero if and only if X is the winning configuration.
+// It can be shown that this heuristic is monotonic.
+//
+// NB: To be in the correct position in the winning configuration, the tile
+// (i,j) should contain the value v = j + i*n, where n is the size of one side
+// of the configuration.
+//
+// [COMPLETE THIS FUNCTION]
+//
+int h1(config X) {
+    ;
+    ;
+    ;
+    return -1;
+}
+
+// Heuristic giving the sum of the distances of the tiles, for every tile in X
+// except the empty tile, to their positions in the winning configuration.
+//
+// The distances must be calculated according to the 4-neighborhood of the grid
+// G[][] (where diagonals are not allowed). It is also the Manhattan distance,
+// which, as a reminder, is: d((i,j),(i',j')) = |i'-i| + |j'-j|. Of course, this
+// sum of distances is zero if and only if X is the winning configuration.
+// It can be shown that this heuristic is monotonic.
+//
+// NB: A tile containing the value v should be found, in the winning
+// configuration, at the position (i,j) such that i = v/n and j = v%n.
+//
+// [COMPLETE THIS FUNCTION]
+//
+int h2(config X) {
+    ;
+    ;
+    ;
+    return -1;
+}
+
+// Heuristic similar to h2 except that the distance for a tile with
+// value v is multiplied by v*v. The idea is to force the solution to
+// place the smaller numbers first, which effectively penalizes the larger ones.
+// Even faster results are obtained by replacing the factor v with v^2. This
+// heuristic is not monotonic.
+//
+// [COMPLETE THIS FUNCTION FOR A BONUS]
+//
+int h3(config X) {
+    ;
+    ;
+    ;
+    return -1;
+}
+
+// Applies the A* algorithm with a heuristic h to calculate
+// a path from a starting configuration S to the winning configuration.
+//
+// The function must return the configuration C corresponding to the
+// winning configuration, with the path determined by the sequence of
+// configurations: C, C->parent, C->parent->parent, ..., S. If the
+// path does not exist, the function should return NULL.
+//
+// [COMPLETE THIS FUNCTION]
+//
+config solve(config S, heuristic h) {
+    heap H = NULL;
+
+    // It is important to avoid this case, otherwise memory+time
+    // will explode.
+    if (!can_win(S))
+        return NULL;
+
+    // Creates a min-heap for fcmp_config() and adds the
+    // starting configuration. NB: The heap implementation given to you
+    // dynamically resizes if necessary. Therefore, you can initialize it
+    // with a small size, such as 4 for example.
+    ;
+    ;
+
+    if (H == NULL) {
+        fprintf(stderr, "%s  Error: heap not allocated.\n", KO);
+        exit(1);
+    }
+
+    // Main loop of A*
+    while (!heap_empty(H)) {    // as long as there remains a configuration
+        config C = heap_pop(H); // C = config with minimal score
+        if (h1(C) == 0)
+            return C; // we are done
+        if (is_marked(C))
+            continue; // C already seen? otherwise, the function is_marked()
+                      // marks C
+
+        char m[] = "bdgh";            // the 4 possible moves
+        for (int i = 0; i < 4; i++) { // for each (possible) neighboring of C
+            // Test here if the move is valid.
+            // Only if it is, do the following:
+            // - update the various fields of the neighbor,
+            // - add it to the heap.
+            ;
+            ;
+            ;
+            ;
+            ;
+        }
+    }
+
+    return NULL; // on a pas trouvé de chemin
+}
+
+//
+//  USAGE: taquin [n]
+//
+int main(int argc, char *argv[]) {
+    int n         = (argc >= 2) ? atoi(argv[1]) : 3;
+    unsigned seed = time(NULL) % 1000;
+    printf("seed: %u\n", seed); // pour rejouer la même chose au cas où
+    srandom(seed);
+
+    config C;
+
+    // exemple du sujet
+    int ex1[3][3] = {
+        {3, 1, 2},
+        {4, 7, 5},
+        {6, 8, 0},
+    };
+
+    // solvable en 5 mouvements
+    int ex2[2][2] = {
+        {0, 2},
+        {3, 1},
+    };
+
+    // solvable en 15 mouvements
+    int ex3[3][3] = {
+        {3, 1, 2},
+        {8, 0, 6},
+        {4, 5, 7},
+    };
+
+    // solvable en 29 mouvements
+    int ex4[3][3] = {
+        {5, 2, 6},
+        {8, 1, 4},
+        {7, 3, 0},
+    };
+
+    // solvable en 53 mouvements (utiliser impérativement h2)
+    int ex5[4][4] = {
+        {14, 4, 7, 9},
+        {13, 0, 1, 12},
+        {3, 11, 10, 2},
+        {6, 8, 5, 15},
+    };
+
+    // Test lancé avec la configuration ex1.
+    // Vous pouvez changer pour une autre.
+    int (*ex)[3] = ex1;
+    // int (*ex)[2] = ex2;
+    // int (*ex)[3] = ex3;
+    // int (*ex)[3] = ex4;
+    // int (*ex)[4] = ex5;
+
+    int n_ex     = sizeof(ex[0]) / sizeof(ex[0][0]); // taille d'une ligne
+    C            = new_config(n_ex);                 // crée une nouvelle config
+    for (int i = 0; i < n_ex; i++)
+        C->G[i] = ex[i]; // copies les lignes
+    set_zero(C);         // important !
+
+    // test de move()
+    printf("====== Test de move ======\n");
+    print_config(C);
+    print_config(move(C, 'd'));
+    printf("\n");
+
+    // test de walk() pour ex1
+    printf("====== Test de walk ======\n");
+    walk(C, "dbdb");
+    printf("\n");
+
+    // test grille n x n aléatoire
+    printf("====== Test de create_random ======\n");
+    C = create_random(n);
+    printf("Starting config\n");
+    print_config(C);
+    printf("Can be solved? %s\n", can_win(C) ? "yes" : "no");
+    printf("\n");
+
+    // test heuristique
+    heuristic h = h1;
+    printf("====== Test d'une heuristique ======\n");
+    printf("h: %d\n", h(C));
+    printf("\n");
+
+    // test solve()
+    printf("====== Test de solve ======\n");
+    C       = solve(C, h); // très long si n>3, utiliser h3
+
+    // affiche le chemin de la config gagnante à la config initiale
+    int cfg = 0; // pour compter le nombre de mouvements
+
+    while (C) {
+        print_config(C);
+        printf("h: %d\n", h(C));
+        C = C->parent;
+        cfg++;
+    }
+
+    printf("\n");
+    printf("#mouvements: %d\n", cfg);
+    printf("#configs in htable: %u\n", HTN ? *HTN : 0);
+    printf("\n");
+
+    return 0;
+}
+
+// Translation of already coded functions (declared in misc.h).
+
+// Performs a sequence of moves while displaying the resulting grids.
+//
+// This function can be used to test move(), see the main() function.
+//
+// It is a generalization of move(), returning the configuration obtained
+// after a sequence of moves encoded by the string s (which, as usual in C,
+// ends with the character '\0'). If a move is invalid, it is skipped. Normally,
+// aside from the display, walk(C,"d") should have the same effect as
+// move(C,'d') (and similarly for the other 3 moves).
+//
+config walk(config C, char *S);
+
+// Function that determines if the configuration C, assumed to be non-NULL,
+// can reach the winning configuration (in fact, only half of the configurations
+// can reach it).
+//
+// Technical explanation (which you can ignore unless you have time):
+//
+// You can win if and only if the PARITIES of the following two numbers are
+// equal:
+//
+// - 1st number: the Manhattan distance between the position of the empty cell
+// in C and the final position. Since this distance is (i0 + j0), its parity is
+// easily calculated: it's ((i0 + j0) % 2).
+//
+// - 2nd number: the number of inversions in the permutation defined by C.
+// To calculate this number, we view the configuration as a permutation
+// P: {0,1,...,k-1} -> {0,...,k-1}, where k = n*n, by reading C->G row by
+// row, left to right.
+//
+// The number of inversions of such a permutation P: {0,...,k-1} ->
+// {0,...,k-1} is the number of index pairs {i,j} such that
+// i<j and P[i]>P[j]. Note that the number of inversions of P is
+// independent of how P is represented (whether as a linear array, square, or
+// other).
+//
+bool can_win(config C);
+
+
+// Builds a random n x n configuration that can reach the winning configuration.
+// To do this, random configurations must be generated until one is found that
+// allows reaching the winning configuration, which can be tested with
+// can_win(). It is assumed that n > 0.
+//
+config create_random(int n);

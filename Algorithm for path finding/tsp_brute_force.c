@@ -52,6 +52,8 @@ double tsp_brute_force(point *V, int n, int *Q) {
 */
 
 // Question 5 : Calcul de valeur optimisé avec arrêt précoce
+// par ex: si on a déjà une tournée de longueur w, et que lors du calcul d'une nouvelle tournée, on dépasse w à l'étape i, alors on peut arrêter le calcul de cette tournée et retourner -i (indice du préfixe fautif).
+// par ex : si on dépasse w à l'étape 3, on retourne -3, ce qui indique que le préfixe de taille 3 est celui qui a causé le dépassement.    
 double value_opt(point *V, int n, int *P, double w) {
     double current_dist = 0;
     for (int i = 0; i < n - 1; i++) {
@@ -70,6 +72,7 @@ double value_opt(point *V, int n, int *P, double w) {
 // Question 6 : MaxPermutation
 // Transforme P en la plus grande permutation (ordre lexicographique) ayant le même préfixe de taille k.
 // Pour cela, il suffit de trier le suffixe (de k à n-1) par ordre décroissant.
+// par exemple P = [0, 1, 2, 3, 4], k = 2 => suffixe = [2, 3, 4] => ordre décroissant => [4, 3, 2] => P devient [0, 1, 4, 3, 2]
 void MaxPermutation(int *P, int n, int k) {
     if (k >= n) return;
     // On inverse le suffixe pour le mettre en ordre décroissant

@@ -1,0 +1,387 @@
+#include "pppp.h"
+
+//
+//  PPPP - Paire de Points les Plus Proches
+//
+//    Chacun des trois algorithmes doit renvoyer le couple {i,j} d' **
+//    indices ** des deux points les plus proches. Voir pppp.h pour
+//    une description plus fine. Pour pppp_divide(), c'est la partie
+//    récursive pppp_rec() que vous devez programmer.
+//
+//    -> la structure "point" est définie dans "tools.h"
+//    -> la structure "couple" est définie dans "pppp.h"
+//
+//
+// Extensions/optimisations à tester (une fois que vous avez bien
+// avancé):
+//
+// Pour pppp_rec():
+//
+// . Pour la recherche du min dans Sy, au lieu de mettre "j <= i+7",
+//   utilisez "Sy[j].y - Sy[i].y < delta", ce qui va générer moins de
+//   tests. Optimisez encore le test avec "Sy[j].y < d" en posant d =
+//   delta + Sy[i].y.
+//
+// . Evitez la construction des tableaux Ax et Bx en réutilisant Vx
+//   qui est déjà trié selon les x.
+//
+// . L'algorithme du cours suppose qu'il n'y a qu'un seul point
+//   d'abscisse x*, l'abscisse du médian. Contournez ce problème pour
+//   qu'il fonctionne sans cette hypothèse. Pour cela, il faut (1)
+//   utiliser le même test de comparaison en x pour le tri de Vx[] et
+//   le remplissage de Ay[] afin de garantir |Ax| = |Ay|; et (2) que
+//   ce test de comparaison en x soit un ordre total, c'est-à-dire ne
+//   donne 0 que si (x,y) = (x',y'), et pas seulement si x = x'.
+//   Testez des points sur une grille avec generateGrid() où le nombre
+//   de colonnes est de la forme 2^k - 1 (= 1, 3, 7, 15, ...).
+//
+// . Améliorez l'algorithme pour qu'il fonctionne même s'il y a des
+//   points superposés (des points avec même x et même y) en testant
+//   les points consécutifs de Vx directement dans pppp_divide().
+//   Testez cette situation avec une affectation comme V[n/2] = V[n-1]
+//   mise après la génération de points.
+//
+// Pour pppp_random():
+//
+// . Il est possible de maintenir l'indice du dernier échec, disons tf
+//   (initialisée à -1), de sorte que les instructions 3b et 3c
+//   doivent être exécutée seulement si t>tf. Faire attention, lors
+//   d'un échec, de bien chercher le point q le plus proche dans le
+//   voisinage, sinon il y aura des échecs plusieurs fois au même
+//   indice.
+//
+// . Optimisez le nombre de cellules voisines en passant de 25 à 21
+//   cellules à explorez. Comparez.
+//
+// NB. Pour comparer plusieurs versions, ajouter une autre fonction à
+//     pppp.c, disons pppp_random_v2(), et mettez à jour pppp.h et
+//     tsp_main.c en ajoutant une ligne.
+
+//this function implements the brute-force algorithm to find the closest pair of points 
+//in an array of points V of size n. It iterates through all pairs of points, calculates the distance 
+//between them using the dist() function, and keeps track of the minimum distance found 
+//and the indices of the closest pair. The result is returned as a couple struct containing 
+//the indices of the two closest points.
+couple pppp_naive(point *V, int n ) {
+  couple result= {-1,-1};
+  double min_dist=DBL_MAX;
+  for (int i=0; i<n; i++){
+    for (int j=i+1; j<n; j++){  // Bắt đầu từ i+1 để không so với chính mình
+      double d=dist(V[i],V[j]);
+      if (d< min_dist && d > 0){  // Thêm d > 0 để bỏ qua khoảng cách 0
+        min_dist=d;
+        result.i=i;
+        result.j=j;
+      }
+    }
+  }
+  return result;
+}
+
+
+
+
+// Fonction de comparaison des ordonnées pour qsort():
+// renvoie -1 si y(A)<y(B), +1 si y(A)>y(B) et 0 sinon.
+int fcmp_y(const void *A, const void *B) {
+  const point *a = (const point *)A;
+  const point *b = (const point *)B;
+  if(a->y < b->y) return -1;
+  if(a->y > b->y) return 1;
+  return 0;
+}
+
+
+// Fonction de comparaison pour des abscisses qsort():
+// renvoie -1 si x(A)<x(B), +1 si x(A)>x(B) et 0 sinon.
+int fcmp_x(const void *A, const void *B) {
+  const point *a = (const point *)A;
+  const point *b = (const point *)B;
+  if(a->x < b->x) return -1;
+  if(a->x > b->x) return 1;
+  // Si x égal, comparer par y pour avoir un ordre total
+  if(a->y < b->y) return -1;
+  if(a->y > b->y) return 1;
+  return 0;
+}
+
+
+// paire de points pour pppp_rec()
+typedef struct{
+  point P1,P2;
+} ppoints;
+
+// Fonction utilitaire pour calculer la distance entre deux points
+static double pair_dist(point a, point b){
+  return dist(a, b);
+}
+
+
+// Cette fonction doit, comme dans l'algorithme du cours, renvoyer la
+// paire de points les plus proche pris dans l'ensemble Vx[] (type
+// "ppoints"), et non pas les indices des points les plus proches
+// (type "couple"). La récurrence est plus simple ainsi. C'est
+// pppp_divide() déjà programmée qui se chargera de retrouver les
+// indices dans V[] des deux points en question.
+//
+// Point de vigilance. Le choix du médian, celui de rang m =
+// ceil(n/2), est important pour que la séparation en A et B donne
+// deux ensembles d'au moins deux points, c'est-à-dire tels |A|=m >= 1
+// et |B|=n-m >= 1. Les points ayant des indices commençant à 0, il
+// faut donc prendre le point d'indice m-1. Il se trouve aussi que
+// ceil(n/2) = floor((n+1)/2) = (int)(n+1)/2.
+//
+ppoints pppp_rec(point* Vx, point* Vy, int n){
+
+  // =========================
+  // Cas de base
+  // =========================
+  if(n <= 3){
+    ppoints Q = {Vx[0], Vx[0]}; // đây là  initialization
+    double min = DBL_MAX;
+
+    for(int i = 0; i < n; i++){
+      for(int j = i + 1; j < n; j++){
+        double d = pair_dist(Vx[i], Vx[j]);
+        if(d < min){
+          min = d;
+          Q.P1 = Vx[i];
+          Q.P2 = Vx[j];
+        }
+      }
+    }
+    return Q;
+  }
+
+  // =========================
+  // Séparation
+  // =========================
+  int m = (n + 1) / 2;          // ceil(n/2)
+  point xm = Vx[m - 1];         // médian
+  double x_star = xm.x;
+
+  // =========================
+  // Construire Ay et By
+  // IMPORTANT: ordre total
+  // =========================
+  point *Ay = malloc(m * sizeof(point));
+  point *By = malloc((n - m) * sizeof(point));
+
+  int ia = 0, ib = 0;
+
+  for(int i = 0; i < n; i++){
+    // même règle que fcmp_x → garantit |A| = |Ay|
+    if( (Vy[i].x < xm.x) || 
+        (Vy[i].x == xm.x && Vy[i].y < xm.y) ||
+        (Vy[i].x == xm.x && Vy[i].y == xm.y && ia < m) ){
+      Ay[ia++] = Vy[i];
+    } else {
+      By[ib++] = Vy[i];
+    }
+  }
+
+  // =========================
+  // Récursion
+  // =========================
+  ppoints Qa = pppp_rec(Vx, Ay, m);
+  ppoints Qb = pppp_rec(Vx + m, By, n - m);
+
+  free(Ay);
+  free(By);
+
+  // =========================
+  // Min entre gauche et droite
+  // =========================
+  double da = pair_dist(Qa.P1, Qa.P2);
+  double db = pair_dist(Qb.P1, Qb.P2);
+
+  double delta;
+  ppoints Q;
+
+  if(da < db){
+    delta = da;
+    Q = Qa;
+  } else {
+    delta = db;
+    Q = Qb;
+  }
+
+  // =========================
+  // Construire Sy (strip)
+  // =========================
+  point *Sy = malloc(n * sizeof(point));
+  int k = 0;
+
+  for(int i = 0; i < n; i++){
+    if(fabs(Vy[i].x - x_star) < delta){
+      Sy[k++] = Vy[i];
+    }
+  }
+
+  // =========================
+  // Vérification dans Sy
+  // =========================
+  for(int i = 0; i < k; i++){
+    for(int j = i + 1; j < k && (Sy[j].y - Sy[i].y) < delta; j++){
+
+      double d = pair_dist(Sy[i], Sy[j]);
+      if(d < delta){
+        delta = d;
+        Q.P1 = Sy[i];
+        Q.P2 = Sy[j];
+      }
+    }
+  }
+
+  free(Sy);
+  return Q;
+}
+couple pppp_divide(point* V,int n){
+
+  couple result = {-1,-1};
+  ppoints Q;
+
+  // Vx[] = V[] trié selon x
+  point *Vx = malloc(n*sizeof(*Vx));
+  memcpy(Vx,V,n*sizeof(*V));
+  qsort(Vx,n,sizeof(point),fcmp_x);
+
+  // Vy[] = V[] trié selon y
+  point *Vy = malloc(n*sizeof(*Vy));
+  memcpy(Vy,V,n*sizeof(*V));
+  qsort(Vy,n,sizeof(point),fcmp_y);
+
+  // Q = {P1,P2} = paire de points les plus proches
+  Q = pppp_rec(Vx,Vy,n);
+  free(Vx);
+  free(Vy);
+
+  // cherche dans V[] les indices des deux points de Q
+  for(int k=0; k<n; k++){
+    if( result.i < 0 && Q.P1.x == V[k].x && Q.P1.y == V[k].y ) result.i = k;
+    if( result.j < 0 && Q.P2.x == V[k].x && Q.P2.y == V[k].y ) result.j = k;
+  }
+  
+  return result;
+}
+
+
+// map: N^2 -> N définit pour tout couple d'entiers (i,j) un entier
+// unique. Il faut i,j >= 0. Il correspond aux nombre de sommets
+// contenus dans les diagonales montantes de la forme (t,0) -> (0,t),
+// partant de (0,0), et jusqu'à atteindre le point (i,j) sans le
+// compter. Cf. le TD.
+//
+//       | | | | | |
+//     4 .-.-.-.-.-.-
+//       | | | | | |
+//     3 o-.-.-.-.-.-
+//       |\| | | | |
+//     2 o-o-.-.-.-.-
+//       |\|\| | | |
+// j = 1 o-o-o-X-.-.-    Ex: map(i,j) = map(3,1) = (#o) = 11
+//       |\|\|\|\| |
+//     0 o-o-o-o-o-.-
+//       0 1 2 3 4 5
+//             i
+//
+int map(int i,int j){
+  // Somme des entiers de 0 à i+j-1 = (i+j)*(i+j-1)/2
+  // Puis on ajoute j pour obtenir le bon point sur la diagonale
+  int t = i + j;
+  return (t * (t - 1)) / 2 + j;
+}
+
+
+// Point de vigilance. Attention à ce que les cellules voisines
+// tombent dans le premier quadrant (i,j >= 0), sinon map(i,j) ne
+// marchera pas.
+couple pppp_random(point* V, int n){
+
+  couple result = {0, 1};
+
+  // =========================
+  // Init
+  // =========================
+  double dmin = dist(V[0], V[1]);
+
+  // Table de hachage
+  htable T = ht_create();
+
+  double delta = dmin / sqrt(2.0);
+
+  // =========================
+  // Boucle principale
+  // =========================
+  for(int t = 0; t < n; t++){
+
+    point p = V[t];
+
+    int cx = (int)floor(p.x / delta);
+    int cy = (int)floor(p.y / delta);
+
+    point* best_q = NULL;
+    double best_d = dmin;
+
+    // =========================
+    // (3b) explorer voisins
+    // =========================
+    for(int dx = -2; dx <= 2; dx++){
+      for(int dy = -2; dy <= 2; dy++){
+
+        int nx = cx + dx;
+        int ny = cy + dy;
+
+        if(nx < 0 || ny < 0) continue;
+
+        point* q = (point*) ht_read(T, map(nx, ny));
+
+        if(q != NULL){
+          double d = dist(p, *q);
+          if(d < best_d){
+            best_d = d;
+            best_q = q;
+          }
+        }
+      }
+    }
+
+    // =========================
+    // (3c) amélioration
+    // =========================
+    if(best_q != NULL && best_d < dmin){
+
+      dmin = best_d;
+
+      // cập nhật result
+      for(int i = 0; i < n; i++){
+        if(V[i].x == p.x && V[i].y == p.y)
+          result.i = i;
+        if(V[i].x == best_q->x && V[i].y == best_q->y)
+          result.j = i;
+      }
+
+      // rebuild table
+      ht_free(T);
+      T = ht_create();
+
+      delta = dmin / sqrt(2.0);
+
+      for(int i = 0; i <= t; i++){
+        int ix = (int)floor(V[i].x / delta);
+        int iy = (int)floor(V[i].y / delta);
+        ht_write(T, map(ix, iy), &V[i]);
+      }
+
+      continue;
+    }
+
+    // =========================
+    // (3d) insertion
+    // =========================
+    ht_write(T, map(cx, cy), &V[t]);
+  }
+
+  ht_free(T);
+  return result;
+}
